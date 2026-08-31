@@ -1,12 +1,10 @@
 import 'package:device_preview_plus/device_preview_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mt/config/env/env.dart';
 import 'package:mt/core/router/router.dart';
 import 'package:mt/injection_container.dart';
 import 'package:mt/config/theme/app_theme.dart';
 import 'package:mt/config/talker/talker_screen.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 void main() async {
@@ -18,8 +16,6 @@ void main() async {
   FlutterError.onError = (details) {
     sl<Talker>().handle(details.exception, details.stack);
   };
-
-  await Supabase.initialize(url: Env.spbUrl, publishableKey: Env.spbPbkey);
 
   runApp(
     DevicePreview(
