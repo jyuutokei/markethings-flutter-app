@@ -1,6 +1,7 @@
 import 'package:device_preview_plus/device_preview_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mt/config/env/env.dart';
 import 'package:mt/core/router/router.dart';
 import 'package:mt/injection_container.dart';
 import 'package:mt/config/theme/app_theme.dart';
@@ -18,10 +19,7 @@ void main() async {
     sl<Talker>().handle(details.exception, details.stack);
   };
 
-  await Supabase.initialize(
-    url: 'https://xmtwpsaocedqqjetmzwa.supabase.co',
-    publishableKey: 'sb_publishable_SDuDZC8EDK7vYUHxY61rdA_ms9YoefJ',
-  );
+  await Supabase.initialize(url: Env.spbUrl, publishableKey: Env.spbPbkey);
 
   runApp(
     DevicePreview(
