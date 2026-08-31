@@ -1,6 +1,8 @@
 # Miscellaneous
 .agents/
 skills-lock.json
+.env
+*.g.dart
 *.class
 *.log
 *.pyc
