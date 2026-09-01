@@ -5,6 +5,7 @@ import 'package:mt/core/router/router.dart';
 import 'package:mt/injection_container.dart';
 import 'package:mt/config/theme/app_theme.dart';
 import 'package:mt/config/talker/talker_screen.dart';
+import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 void main() async {
@@ -34,6 +35,9 @@ class MainApp extends StatelessWidget {
       routerConfig: goRouter,
       debugShowCheckedModeBanner: false,
       locale: DevicePreview.locale(context),
+      localizationsDelegates:
+          SupabaseAuthUILocalizations.localizationsDelegates,
+      supportedLocales: SupabaseAuthUILocalizations.supportedLocales,
       builder: (context, child) {
         child = DevicePreview.appBuilder(context, child);
 
