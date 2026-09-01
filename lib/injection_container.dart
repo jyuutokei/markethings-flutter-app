@@ -11,6 +11,7 @@ void setupLocator() async {
   sl.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
 
   // talker
-  sl.registerSingleton(TalkerFlutter.init());
-  sl.registerSingleton(TalkerRouteObserver(Talker()));
+  sl.registerSingleton<Talker>(TalkerFlutter.init());
+  sl.registerSingleton<TalkerRouteObserver>(TalkerRouteObserver(Talker()));
+  sl.registerSingleton<TalkerLogger>(TalkerLogger());
 }
