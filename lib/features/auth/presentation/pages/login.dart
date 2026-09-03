@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mt/config/env/env.dart';
+import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/router/routes.dart';
 import 'package:mt/injection_container.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
@@ -16,6 +18,7 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final logger = sl<TalkerLogger>();
+  bool _isSigningIn = true;
 
   @override
   Widget build(BuildContext context) {
@@ -30,30 +33,71 @@ class _LoginState extends State<Login> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
             child: SupaEmailAuth(
+              key: ValueKey(_isSigningIn),
+              isInitiallySigningIn: _isSigningIn,
+              showConfirmPasswordField: true,
+              showSnackBars: true,
+              passwordValidator: (value) {
+                if (_isSigningIn) {
+                  return null;
+                }
+
+                final password = value ?? '';
+                final missingRequirements = <String>[];
+
+                if (password.length < 8) {
+                  missingRequirements.add('At least 8 characters');
+                }
+                if (!RegExp(r'\d').hasMatch(password)) {
+                  missingRequirements.add('A number');
+                }
+                if (!RegExp(r'[a-z]').hasMatch(password)) {
+                  missingRequirements.add('A lowercase letter');
+                }
+                if (!RegExp(r'[A-Z]').hasMatch(password)) {
+                  missingRequirements.add('An uppercase letter');
+                }
+
+                return missingRequirements.isEmpty
+                    ? null
+                    : 'Password must contain:\n'
+                          '${missingRequirements.map((requirement) => '- $requirement').join('\n')}';
+              },
+              useOtpForPasswordRecovery: true,
+              onToggleSignIn: (isSigningIn) {
+                setState(() {
+                  _isSigningIn = isSigningIn;
+                });
+              },
               redirectTo: kIsWeb
                   ? null
-                  : 'io.supabase.markethings://login-callback/',
+                  : 'io.supabase.markethings://login_callback/',
               onSignInComplete: (response) {
-                context.goNamed(AppRoute.home);
+                context.pushReplacementNamed(AppRoute.home);
               },
               onSignUpComplete: (response) {
-                context.goNamed(AppRoute.home);
-              },
-              onError: (error) {
-                logger.error('Auth error: $error');
+                if (response.session == null) {
+                  context.pushNamed(
+                    AppRoute.confirmEmailOtp,
+                    extra: response.user!.email,
+                  );
+                }
               },
             ),
           ),
-          Gap(20),
+          const Gap(defaultPadding),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
             child: SupaSocialsAuth(
               redirectUrl: kIsWeb
                   ? null
-                  : 'io.supabase.markethings://login-callback/',
-              socialProviders: [OAuthProvider.google],
+                  : 'io.supabase.markethings://login_callback/',
+              socialProviders: const [OAuthProvider.google],
+              nativeGoogleAuthConfig: NativeGoogleAuthConfig(
+                webClientId: Env.googleWebClientId,
+              ),
               onSuccess: (session) {
                 context.goNamed(AppRoute.home);
               },
