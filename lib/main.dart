@@ -8,7 +8,7 @@ import 'package:mt/config/talker/talker_screen.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // load services
