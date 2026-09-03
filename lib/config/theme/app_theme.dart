@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 ThemeData theme() {
   return ThemeData(
-    scaffoldBackgroundColor: Color(0xff9cd5ff),
+    scaffoldBackgroundColor: const Color(0xff9cd5ff),
     fontFamily: 'Poppins',
     colorScheme: ThemeData.light().colorScheme.copyWith(
-      primary: Color(0xff046ef4),
+      primary: const Color(0xff046ef4),
       onPrimary: Colors.white,
-      secondary: Color(0xff077eff),
+      secondary: const Color(0xff077eff),
       onSecondary: Colors.white,
     ),
     textTheme: ThemeData.light().textTheme.apply(
@@ -15,12 +15,18 @@ ThemeData theme() {
       displayColor: Colors.black,
       decorationColor: Colors.black,
     ),
-    inputDecorationTheme: InputDecorationTheme(
+    inputDecorationTheme: const InputDecorationTheme(
       labelStyle: TextStyle(color: Colors.black),
       hintStyle: TextStyle(color: Colors.black),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(foregroundColor: Colors.black),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xff046ef4),
+        foregroundColor: Colors.white,
+      ),
     ),
   );
 }
