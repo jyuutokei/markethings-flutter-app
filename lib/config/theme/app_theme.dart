@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 
 ThemeData theme() {
   return ThemeData(
@@ -28,6 +29,20 @@ ThemeData theme() {
         foregroundColor: Colors.white,
       ),
     ),
+    extensions: const [
+      MaterialPinThemeExtension(
+        theme: MaterialPinTheme(
+          shape: MaterialPinShape.outlined,
+          cellSize: Size(36, 44),
+          spacing: 12,
+          entryAnimation: MaterialPinAnimation.scale,
+          animationDuration: Duration(milliseconds: 150),
+          animationCurve: Curves.easeOut,
+          enableErrorShake: true,
+          errorAnimationDuration: Duration(milliseconds: 300),
+        ),
+      ),
+    ],
   );
 }
 
