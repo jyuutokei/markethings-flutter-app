@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mt/config/env/env.dart';
 import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/router/routes.dart';
+import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/injection_container.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -78,12 +79,39 @@ class _LoginState extends State<Login> {
                 context.pushReplacementNamed(AppRoute.home);
               },
               onSignUpComplete: (response) {
+                final user = response.user;
+                final email = user?.email;
+
+                if (email == null) {
+                  AppHelpers.showSnackBar(
+                    context,
+                    'Could not determine the signup email.',
+                  );
+                  return;
+                }
+
+                // supabase returns an empty identities list for an existing email
+                // when email confirmation is enabled.
+                if (user?.identities?.isEmpty ?? true) {
+                  AppHelpers.showSnackBar(
+                    context,
+                    'An account may already exist with this email. Try signing in or resetting your password.',
+                  );
+
+                  return;
+                }
+
                 if (response.session == null) {
                   context.pushNamed(
                     AppRoute.confirmEmailOtp,
                     extra: response.user!.email,
                   );
+                } else {
+                  context.pushReplacementNamed(AppRoute.home);
                 }
+              },
+              onPasswordResetEmailSent: (email) {
+                // TODO: make custom reset password page and handle password reset there
               },
             ),
           ),
