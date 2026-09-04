@@ -26,6 +26,7 @@ dependencies:
   gap: ^3.0.1
   pin_code_fields: ^9.4.0
   equatable: ^2.1.0
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:
