@@ -39,7 +39,7 @@ class _LoginState extends State<Login> {
               key: ValueKey(_isSigningIn),
               isInitiallySigningIn: _isSigningIn,
               showConfirmPasswordField: true,
-              showSnackBars: true,
+              showSnackBars: false,
               passwordValidator: (value) {
                 if (_isSigningIn) {
                   return null;
@@ -78,7 +78,7 @@ class _LoginState extends State<Login> {
               onSignInComplete: (response) {
                 context.pushReplacementNamed(AppRoute.home);
               },
-              onSignUpComplete: (response) {
+              onSignUpComplete: (response) async {
                 final user = response.user;
                 final email = user?.email;
 
@@ -104,14 +104,28 @@ class _LoginState extends State<Login> {
                 if (response.session == null) {
                   context.pushNamed(
                     AppRoute.confirmEmailOtp,
-                    extra: response.user!.email,
+                    extra: {
+                      'email': response.user!.email,
+                      'sentAt': DateTime.now(),
+                    },
                   );
                 } else {
                   context.pushReplacementNamed(AppRoute.home);
                 }
               },
               onPasswordResetEmailSent: (email) {
-                // TODO: make custom reset password page and handle password reset there
+                context.pushNamed(
+                  AppRoute.resetPwdOtp,
+                  extra: {'email': email, 'sentAt': DateTime.now()},
+                );
+              },
+              onError: (error) {
+                final message = error is AuthApiException
+                    ? error.message
+                    : error.toString();
+
+                AppHelpers.showSnackBar(context, message);
+                logger.error(message);
               },
             ),
           ),
