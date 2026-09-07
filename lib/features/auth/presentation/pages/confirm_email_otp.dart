@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -14,8 +13,9 @@ import 'package:talker_flutter/talker_flutter.dart';
 
 class ConfirmEmailOtp extends StatefulWidget {
   final String email;
+  final DateTime? sentAt;
 
-  const ConfirmEmailOtp({required this.email, super.key});
+  const ConfirmEmailOtp({required this.email, this.sentAt, super.key});
 
   @override
   State<ConfirmEmailOtp> createState() => _ConfirmEmailOtpState();
@@ -27,7 +27,8 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
   final logger = sl<TalkerLogger>();
   bool _isLoading = false;
   static const _cooldownDuration = Duration(seconds: 60);
-  String get _cooldownKey => 'otp_cooldown_${widget.email}';
+  String get _cooldownKey => 'confirm_otp_cooldown_${widget.email}';
+  late final preferences = sl<SharedPreferences>();
   int _cooldownSec = 60;
   bool _isResending = false;
   bool _canResend = false;
@@ -36,7 +37,12 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
   @override
   void initState() {
     super.initState();
-    _loadCooldown();
+
+    if (widget.sentAt != null) {
+      initialResendTime();
+    } else {
+      _loadCooldown();
+    }
   }
 
   @override
@@ -46,9 +52,23 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
     super.dispose();
   }
 
-  Future<void> _loadCooldown() async {
-    final preferences = await SharedPreferences.getInstance();
+  void initialResendTime() {
+    final expiry = DateTime.now().add(_cooldownDuration);
+    preferences.setInt(_cooldownKey, expiry.millisecondsSinceEpoch);
+
+    if (!mounted) return;
+
+    setState(() {
+      _cooldownSec = _cooldownDuration.inSeconds;
+      _canResend = false;
+    });
+
+    _loadCooldown();
+  }
+
+  void _loadCooldown() {
     final expiryMs = preferences.getInt(_cooldownKey) ?? 0;
+    sl<TalkerLogger>().log(expiryMs);
 
     if (!mounted) return;
 
@@ -67,11 +87,10 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
     }
   }
 
-  Future<void> _startCooldown() async {
-    final preferences = await SharedPreferences.getInstance();
+  void _startCooldown() {
     final expiry = DateTime.now().add(_cooldownDuration);
 
-    await preferences.setInt(_cooldownKey, expiry.millisecondsSinceEpoch);
+    preferences.setInt(_cooldownKey, expiry.millisecondsSinceEpoch);
 
     if (!mounted) return;
 
@@ -91,8 +110,7 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
     });
   }
 
-  Future<void> _updateCooldown() async {
-    final preferences = await SharedPreferences.getInstance();
+  void _updateCooldown() {
     final expiryMs = preferences.getInt(_cooldownKey) ?? 0;
 
     final seconds = ((expiryMs - DateTime.now().millisecondsSinceEpoch) / 1000);
@@ -121,7 +139,7 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
         AppHelpers.showSnackBar(context, 'New verification code sent!');
       }
 
-      await _startCooldown();
+      _startCooldown();
     } on AuthException catch (error) {
       if (mounted) {
         AppHelpers.showSnackBar(context, 'Invalid OTP: ${error.message}');
