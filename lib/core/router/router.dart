@@ -47,8 +47,20 @@ final goRouter = GoRouter(
       path: '/confirm_email_otp',
       name: AppRoute.confirmEmailOtp,
       builder: (context, state) {
-        final email = state.extra as String?;
-        return email != null ? ConfirmEmailOtp(email: email) : const Login();
+        final args = state.extra as Map<String, dynamic>;
+        return args['email'] != null
+            ? ConfirmEmailOtp(email: args['email'], sentAt: args['sentAt'])
+            : const Login();
+      },
+    ),
+    GoRoute(
+      path: '/reset_pwd_otp',
+      name: AppRoute.resetPwdOtp,
+      builder: (context, state) {
+        final args = state.extra as Map<String, dynamic>;
+        return args['email'] != null
+            ? ConfirmEmailOtp(email: args['email'], sentAt: args['sentAt'])
+            : const Login();
       },
     ),
   ],
