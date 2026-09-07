@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:mt/core/router/router.dart';
 import 'package:mt/injection_container.dart';
 import 'package:mt/config/theme/app_theme.dart';
-import 'package:mt/config/talker/talker_screen.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -38,11 +37,7 @@ class MainApp extends StatelessWidget {
       localizationsDelegates:
           SupabaseAuthUILocalizations.localizationsDelegates,
       supportedLocales: SupabaseAuthUILocalizations.supportedLocales,
-      builder: (context, child) {
-        child = DevicePreview.appBuilder(context, child);
-
-        return Stack(children: [child, talkerScreen(rootNavigatorKey)]);
-      },
+      builder: DevicePreview.appBuilder,
       themeMode: ThemeMode.light,
       theme: theme(),
     );
