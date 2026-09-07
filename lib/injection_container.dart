@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:mt/features/auth/data/repository/auth_repo_impl.dart';
 import 'package:mt/features/auth/domain/repository/auth_repo.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 import 'package:mt/config/env/env.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -17,4 +18,8 @@ void setupLocator() async {
   sl.registerSingleton<Talker>(TalkerFlutter.init());
   sl.registerSingleton<TalkerRouteObserver>(TalkerRouteObserver(Talker()));
   sl.registerSingleton<TalkerLogger>(TalkerLogger());
+
+  // shared preference
+  final sharedPreference = await SharedPreferences.getInstance();
+  sl.registerSingleton<SharedPreferences>(sharedPreference);
 }
