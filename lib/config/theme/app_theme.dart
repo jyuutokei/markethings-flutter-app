@@ -10,15 +10,40 @@ ThemeData theme() {
       onPrimary: Colors.white,
       secondary: const Color(0xff077eff),
       onSecondary: Colors.white,
+      onError: const Color(0xffd32f2f),
     ),
     textTheme: ThemeData.light().textTheme.apply(
       bodyColor: Colors.black,
       displayColor: Colors.black,
       decorationColor: Colors.black,
     ),
-    inputDecorationTheme: const InputDecorationTheme(
-      labelStyle: TextStyle(color: Colors.black),
-      hintStyle: TextStyle(color: Colors.black),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: Colors.white,
+      labelStyle: const TextStyle(color: Colors.black),
+      hintStyle: const TextStyle(color: Colors.black),
+      prefixIconColor: const Color(0xff8b8b8b),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Color(0xff046ef4), width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Color(0xffd32f2f)),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Color(0xffd32f2f), width: 2),
+      ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(foregroundColor: Colors.black),
