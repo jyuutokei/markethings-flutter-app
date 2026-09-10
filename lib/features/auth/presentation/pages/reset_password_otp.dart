@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mt/core/constants/constants.dart';
+import 'package:mt/core/router/routes.dart';
 import 'package:mt/core/utils/helpers.dart';
+import 'package:mt/features/auth/presentation/widgets/password_field.dart';
 import 'package:mt/injection_container.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,6 +25,9 @@ class ResetPasswordOtp extends StatefulWidget {
 
 class _ResetPasswordOtpState extends State<ResetPasswordOtp> {
   final PinInputController _otpController = PinInputController();
+  final _newPwdController = TextEditingController();
+  final _confirmNewPwdController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   final _supabase = sl<SupabaseClient>();
   final logger = sl<TalkerLogger>();
   bool _isLoading = false;
@@ -36,15 +42,23 @@ class _ResetPasswordOtpState extends State<ResetPasswordOtp> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.sentAt != null) {
+      _initialResendTime();
+    } else {
+      _loadCooldown();
+    }
   }
 
   @override
   void dispose() {
     _otpController.dispose();
+    _newPwdController.dispose();
+    _confirmNewPwdController.dispose();
     super.dispose();
   }
 
-  void initialResendTime() {
+  void _initialResendTime() {
     final expiry = DateTime.now().add(_cooldownDuration);
     preferences.setInt(_cooldownKey, expiry.millisecondsSinceEpoch);
 
@@ -60,7 +74,6 @@ class _ResetPasswordOtpState extends State<ResetPasswordOtp> {
 
   void _loadCooldown() {
     final expiryMs = preferences.getInt(_cooldownKey) ?? 0;
-    sl<TalkerLogger>().log(expiryMs);
 
     if (!mounted) return;
 
@@ -145,17 +158,31 @@ class _ResetPasswordOtpState extends State<ResetPasswordOtp> {
   }
 
   Future<void> _verifyOtp() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
-      final response = await _supabase.auth.verifyOTP(
+      await _supabase.auth.verifyOTP(
         email: widget.email,
         token: _otpController.text.trim(),
         type: OtpType.recovery,
       );
 
-      if (response.session != null && mounted) {
-        // update user here and bring them back to logi page
+      await _supabase.auth.updateUser(
+        UserAttributes(password: _newPwdController.text),
+      );
+
+      await _supabase.auth.signOut();
+
+      AppHelpers.showGlobalSnackBar(
+        'Password updated successfully. Please login again.',
+      );
+
+      if (mounted) {
+        context.pushReplacementNamed(AppRoute.login);
       }
     } on AuthException catch (error) {
       if (mounted) {
@@ -203,6 +230,51 @@ class _ResetPasswordOtpState extends State<ResetPasswordOtp> {
                     ),
             ),
             const Gap(defaultPadding),
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  PasswordField(
+                    controller: _newPwdController,
+                    label: 'New password',
+                    validator: (value) {
+                      final password = value ?? '';
+                      final missingRequirements = <String>[];
+
+                      if (password.length < 8) {
+                        missingRequirements.add('At least 8 characters');
+                      }
+                      if (!RegExp(r'\d').hasMatch(password)) {
+                        missingRequirements.add('A number');
+                      }
+                      if (!RegExp(r'[a-z]').hasMatch(password)) {
+                        missingRequirements.add('A lowercase letter');
+                      }
+                      if (!RegExp(r'[A-Z]').hasMatch(password)) {
+                        missingRequirements.add('An uppercase letter');
+                      }
+
+                      return missingRequirements.isEmpty
+                          ? null
+                          : 'Password must contain:\n'
+                                '${missingRequirements.map((requirement) => '- $requirement').join('\n')}';
+                    },
+                  ),
+                  const Gap(defaultPadding),
+                  PasswordField(
+                    controller: _confirmNewPwdController,
+                    label: 'Confirm new password',
+                    validator: (value) {
+                      if (value != _newPwdController.text) {
+                        return 'Password do not match.';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const Gap(defaultPadding),
             ElevatedButton(
               onPressed: !_isLoading ? _verifyOtp : null,
               child: _isLoading
@@ -211,7 +283,7 @@ class _ResetPasswordOtpState extends State<ResetPasswordOtp> {
                       height: 24,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Verify OTP'),
+                  : const Text('Update password'),
             ),
           ],
         ),
