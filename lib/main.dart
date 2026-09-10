@@ -2,6 +2,7 @@ import 'package:device_preview_plus/device_preview_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mt/core/router/router.dart';
+import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/injection_container.dart';
 import 'package:mt/config/theme/app_theme.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
@@ -33,6 +34,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp.router(
       routerConfig: goRouter,
       debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: rootScaffoldMessengerKey,
       locale: DevicePreview.locale(context),
       localizationsDelegates:
           SupabaseAuthUILocalizations.localizationsDelegates,
