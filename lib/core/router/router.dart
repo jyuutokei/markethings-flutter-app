@@ -4,6 +4,7 @@ import 'package:mt/core/router/go_router_refresh_stream.dart';
 import 'package:mt/core/router/routes.dart';
 import 'package:mt/features/auth/domain/repository/auth_repo.dart';
 import 'package:mt/features/auth/presentation/pages/confirm_email_otp.dart';
+import 'package:mt/features/auth/presentation/pages/reset_password_otp.dart';
 import 'package:mt/features/error/presentation/error404.dart';
 import 'package:mt/features/auth/presentation/pages/login.dart';
 import 'package:mt/features/home/presentation/pages/home.dart';
@@ -18,9 +19,14 @@ final goRouter = GoRouter(
   observers: [sl<TalkerRouteObserver>()],
   initialLocation: '/',
   refreshListenable: GoRouterRefreshStream(authRepo.authStateChange),
-  redirect: (context, state) {
-    final isLoggedIn = authRepo.isLoggedIn;
+  redirect: (context, state) async {
     final location = state.matchedLocation;
+
+    if (location == '/reset_pwd_otp') {
+      return null;
+    }
+
+    final isLoggedIn = authRepo.isLoggedIn;
     final isGuestOnlyRoute = AppRouteGuard.guestOnlyRoutes.contains(location);
     final isAuthenticatedOnlyRoute = AppRouteGuard.authenticatedOnlyRoutes
         .contains(location);
@@ -28,7 +34,10 @@ final goRouter = GoRouter(
     if (!isLoggedIn && (isAuthenticatedOnlyRoute || !isGuestOnlyRoute)) {
       return '/login';
     }
-    if (isLoggedIn && isGuestOnlyRoute) return '/';
+
+    if (isLoggedIn && isGuestOnlyRoute) {
+      return '/';
+    }
 
     return null;
   },
@@ -59,7 +68,7 @@ final goRouter = GoRouter(
       builder: (context, state) {
         final args = state.extra as Map<String, dynamic>;
         return args['email'] != null
-            ? ConfirmEmailOtp(email: args['email'], sentAt: args['sentAt'])
+            ? ResetPasswordOtp(email: args['email'], sentAt: args['sentAt'])
             : const Login();
       },
     ),
