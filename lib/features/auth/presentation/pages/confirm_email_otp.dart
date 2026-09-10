@@ -39,7 +39,7 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
     super.initState();
 
     if (widget.sentAt != null) {
-      initialResendTime();
+      _initialResendTime();
     } else {
       _loadCooldown();
     }
@@ -52,7 +52,7 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
     super.dispose();
   }
 
-  void initialResendTime() {
+  void _initialResendTime() {
     final expiry = DateTime.now().add(_cooldownDuration);
     preferences.setInt(_cooldownKey, expiry.millisecondsSinceEpoch);
 
@@ -68,7 +68,6 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
 
   void _loadCooldown() {
     final expiryMs = preferences.getInt(_cooldownKey) ?? 0;
-    sl<TalkerLogger>().log(expiryMs);
 
     if (!mounted) return;
 
@@ -163,6 +162,10 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
       );
 
       if (response.session != null && mounted) {
+        AppHelpers.showSnackBar(
+          context,
+          "Account successfully created. Happy shopping!",
+        );
         context.pushReplacementNamed(AppRoute.home);
       }
     } on AuthException catch (error) {
