@@ -20,6 +20,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final logger = sl<TalkerLogger>();
   bool _isSigningIn = true;
+  bool _hasOpenedResetOtp = false;
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +39,8 @@ class _LoginState extends State<Login> {
             child: SupaEmailAuth(
               key: ValueKey(_isSigningIn),
               isInitiallySigningIn: _isSigningIn,
-              showConfirmPasswordField: true,
               showSnackBars: false,
+              showConfirmPasswordField: true,
               passwordValidator: (value) {
                 if (_isSigningIn) {
                   return null;
@@ -76,6 +77,10 @@ class _LoginState extends State<Login> {
                   ? null
                   : 'io.supabase.markethings://login_callback/',
               onSignInComplete: (response) {
+                AppHelpers.showSnackBar(
+                  context,
+                  "Signed in successfully. Happy shopping!",
+                );
                 context.pushReplacementNamed(AppRoute.home);
               },
               onSignUpComplete: (response) async {
@@ -114,6 +119,10 @@ class _LoginState extends State<Login> {
                 }
               },
               onPasswordResetEmailSent: (email) {
+                if (_hasOpenedResetOtp) return;
+
+                _hasOpenedResetOtp = true;
+
                 context.pushNamed(
                   AppRoute.resetPwdOtp,
                   extra: {'email': email, 'sentAt': DateTime.now()},
@@ -133,6 +142,8 @@ class _LoginState extends State<Login> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
             child: SupaSocialsAuth(
+              showSnackBars: false,
+              showSuccessSnackBar: false,
               redirectUrl: kIsWeb
                   ? null
                   : 'io.supabase.markethings://login_callback/',
@@ -141,9 +152,18 @@ class _LoginState extends State<Login> {
                 webClientId: Env.googleWebClientId,
               ),
               onSuccess: (session) {
-                context.goNamed(AppRoute.home);
+                AppHelpers.showSnackBar(
+                  context,
+                  "Signed in successfully. Happy shopping!",
+                );
+                context.pushReplacementNamed(AppRoute.home);
               },
               onError: (error) {
+                final message = error is AuthApiException
+                    ? error.message
+                    : error.toString();
+
+                AppHelpers.showSnackBar(context, message);
                 logger.error('Auth error: $error');
               },
             ),
