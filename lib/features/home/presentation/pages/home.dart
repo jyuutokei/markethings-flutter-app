@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mt/core/constants/constants.dart';
+import 'package:mt/features/home/presentation/widgets/categories.dart';
+import 'package:mt/features/home/presentation/widgets/new_arrival_products.dart';
+import 'package:mt/features/home/presentation/widgets/popular_products.dart';
+import 'package:mt/features/home/presentation/widgets/search_form.dart';
 import 'package:mt/injection_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
@@ -57,6 +61,23 @@ class _HomeState extends State<Home> {
             onPressed: () {},
           ),
         ],
+      ),
+      body: const SingleChildScrollView(
+        physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        padding: EdgeInsets.all(defaultPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Explore"),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: defaultPadding),
+              child: SearchForm(),
+            ),
+            Categories(),
+            NewArrivalProducts(),
+            PopularProducts(),
+          ],
+        ),
       ),
     );
   }
