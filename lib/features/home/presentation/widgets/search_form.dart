@@ -43,7 +43,13 @@ class SearchForm extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {},
-                child: SvgPicture.asset("assets/icons/Filter.svg"),
+                child: SvgPicture.asset(
+                  "assets/icons/Filter.svg",
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
             ),
           ),
