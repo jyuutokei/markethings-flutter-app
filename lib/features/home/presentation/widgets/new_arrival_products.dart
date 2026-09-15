@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mt/core/constants/constants.dart';
+import 'package:mt/core/router/routes.dart';
 import 'package:mt/features/home/data/models/product.dart';
-import 'package:mt/features/home/presentation/pages/details.dart';
 import 'product_card.dart';
 import 'section_title.dart';
 
@@ -32,12 +33,9 @@ class NewArrivalProducts extends StatelessWidget {
                   price: demoProduct[index].price,
                   bgColor: demoProduct[index].bgColor,
                   press: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            DetailsScreen(product: demoProduct[index]),
-                      ),
+                    context.pushNamed(
+                      AppRoute.productDetails,
+                      extra: demoProduct[index],
                     );
                   },
                 ),
