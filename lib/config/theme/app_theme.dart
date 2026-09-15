@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 ThemeData theme() {
-  return ThemeData(
+  final themeData = ThemeData(
     scaffoldBackgroundColor: const Color(0xff9cd5ff),
     fontFamily: 'Poppins',
     colorScheme: ThemeData.light().colorScheme.copyWith(
@@ -11,6 +11,13 @@ ThemeData theme() {
       secondary: const Color(0xff077eff),
       onSecondary: Colors.white,
       onError: const Color(0xffd32f2f),
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      centerTitle: true,
+      iconTheme: IconThemeData(color: Color(0xff046ef4)),
+      titleTextStyle: TextStyle(color: Colors.black, fontSize: 18),
     ),
     textTheme: ThemeData.light().textTheme.apply(
       bodyColor: Colors.black,
@@ -54,6 +61,22 @@ ThemeData theme() {
         foregroundColor: Colors.white,
       ),
     ),
+    navigationBarTheme: NavigationBarThemeData(
+      labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const TextStyle(color: Color(0xff046ef4));
+        }
+
+        return const TextStyle(color: Colors.black);
+      }),
+      iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const IconThemeData(color: Color(0xff046ef4));
+        }
+
+        return const IconThemeData(color: Colors.black);
+      }),
+    ),
     extensions: const [
       MaterialPinThemeExtension(
         theme: MaterialPinTheme(
@@ -69,14 +92,5 @@ ThemeData theme() {
       ),
     ],
   );
-}
-
-AppBarTheme appBarTheme() {
-  return const AppBarTheme(
-    backgroundColor: Colors.white,
-    elevation: 0,
-    centerTitle: true,
-    iconTheme: IconThemeData(color: Color(0xff8b8b8b)),
-    titleTextStyle: TextStyle(color: Color(0xff8b8b8b), fontSize: 18),
-  );
+  return themeData;
 }
