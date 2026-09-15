@@ -33,20 +33,21 @@ class SearchForm extends StatelessWidget {
               vertical: defaultPadding / 2,
             ),
             child: SizedBox(
-              width: 48,
               height: 48,
               child: ElevatedButton(
+                onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(12)),
                   ),
                 ),
-                onPressed: () {},
                 child: SvgPicture.asset(
                   "assets/icons/Filter.svg",
-                  colorFilter: const ColorFilter.mode(
-                    Colors.white,
+                  width: 30,
+                  height: 30,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).colorScheme.onPrimary,
                     BlendMode.srcIn,
                   ),
                 ),
