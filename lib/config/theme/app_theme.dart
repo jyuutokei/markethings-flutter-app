@@ -7,9 +7,7 @@ ThemeData theme() {
     fontFamily: 'Poppins',
     colorScheme: ThemeData.light().colorScheme.copyWith(
       primary: const Color(0xff046ef4),
-      onPrimary: Colors.white,
       secondary: const Color(0xff077eff),
-      onSecondary: Colors.white,
       onError: const Color(0xffd32f2f),
     ),
     appBarTheme: const AppBarTheme(
