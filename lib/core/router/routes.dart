@@ -4,6 +4,7 @@ abstract class AppRoute {
   static const favorites = 'favorites';
   static const profile = 'profile';
   static const productDetails = 'product_details';
+  static const search = 'search';
 
   static const login = 'login';
   static const confirmEmailOtp = 'confirm_email_otp';
@@ -19,5 +20,6 @@ abstract class AppRouteGuard {
     '/favorites',
     '/profile',
     '/product_details',
+    '/search',
   };
 }
