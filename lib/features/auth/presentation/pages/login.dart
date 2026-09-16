@@ -1,3 +1,4 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -79,7 +80,9 @@ class _LoginState extends State<Login> {
               onSignInComplete: (response) {
                 AppHelpers.showSnackBar(
                   context,
-                  "Signed in successfully. Happy shopping!",
+                  "Signed in successfully",
+                  "Happy shopping!",
+                  ContentType.success,
                 );
                 context.pushReplacementNamed(AppRoute.home);
               },
@@ -90,7 +93,9 @@ class _LoginState extends State<Login> {
                 if (email == null) {
                   AppHelpers.showSnackBar(
                     context,
+                    "Something went wrong",
                     'Could not determine the signup email.',
+                    ContentType.failure,
                   );
                   return;
                 }
@@ -100,7 +105,9 @@ class _LoginState extends State<Login> {
                 if (user?.identities?.isEmpty ?? true) {
                   AppHelpers.showSnackBar(
                     context,
+                    "Something went wrong",
                     'An account may already exist with this email. Try signing in or resetting your password.',
+                    ContentType.failure,
                   );
 
                   return;
@@ -133,7 +140,12 @@ class _LoginState extends State<Login> {
                     ? error.message
                     : error.toString();
 
-                AppHelpers.showSnackBar(context, message);
+                AppHelpers.showSnackBar(
+                  context,
+                  "Something went wrong",
+                  message,
+                  ContentType.failure,
+                );
                 logger.error(message);
               },
             ),
@@ -154,7 +166,9 @@ class _LoginState extends State<Login> {
               onSuccess: (session) {
                 AppHelpers.showSnackBar(
                   context,
-                  "Signed in successfully. Happy shopping!",
+                  "Signed in successfully",
+                  "Happy shopping!",
+                  ContentType.success,
                 );
                 context.pushReplacementNamed(AppRoute.home);
               },
@@ -163,7 +177,12 @@ class _LoginState extends State<Login> {
                     ? error.message
                     : error.toString();
 
-                AppHelpers.showSnackBar(context, message);
+                AppHelpers.showSnackBar(
+                  context,
+                  "Something went wrong",
+                  message,
+                  ContentType.failure,
+                );
                 logger.error('Auth error: $error');
               },
             ),
