@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mt/core/constants/constants.dart';
@@ -135,13 +137,23 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
       await _supabase.auth.resend(type: OtpType.signup, email: widget.email);
 
       if (mounted) {
-        AppHelpers.showSnackBar(context, 'New verification code sent!');
+        AppHelpers.showSnackBar(
+          context,
+          "New code",
+          'New verification code sent!',
+          ContentType.help,
+        );
       }
 
       _startCooldown();
     } on AuthException catch (error) {
       if (mounted) {
-        AppHelpers.showSnackBar(context, 'Invalid OTP: ${error.message}');
+        AppHelpers.showSnackBar(
+          context,
+          "Invalid OTP",
+          error.message,
+          ContentType.failure,
+        );
         logger.error('Resend OTP error: $error');
       }
     } finally {
@@ -164,13 +176,20 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
       if (response.session != null && mounted) {
         AppHelpers.showSnackBar(
           context,
-          "Account successfully created. Happy shopping!",
+          "Account successfully created.",
+          "Happy shopping!",
+          ContentType.success,
         );
         context.pushReplacementNamed(AppRoute.home);
       }
     } on AuthException catch (error) {
       if (mounted) {
-        AppHelpers.showSnackBar(context, 'Invalid OTP: ${error.message}');
+        AppHelpers.showSnackBar(
+          context,
+          "Invalid OTP",
+          error.message,
+          ContentType.failure,
+        );
         logger.error('OTP verification error: $error');
       }
     } finally {
@@ -207,7 +226,7 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
                   ? const SizedBox(
                       width: 24,
                       height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: SpinKitThreeBounce(color: Colors.white, size: 10),
                     )
                   : Text(
                       _canResend ? 'Resend OTP' : 'Resend in $_cooldownSec s',
@@ -220,7 +239,7 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
                   ? const SizedBox(
                       width: 24,
                       height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: SpinKitThreeBounce(color: Colors.white, size: 10),
                     )
                   : const Text('Verify OTP'),
             ),
