@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mt/core/router/bottom_nav.dart';
@@ -14,6 +15,7 @@ import 'package:mt/features/home/presentation/pages/details.dart';
 import 'package:mt/features/home/presentation/pages/favorites.dart';
 import 'package:mt/features/home/presentation/pages/home.dart';
 import 'package:mt/features/home/presentation/pages/profile.dart';
+import 'package:mt/features/home/presentation/widgets/search_form.dart';
 import 'package:mt/injection_container.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -77,10 +79,38 @@ final goRouter = GoRouter(
       parentNavigatorKey: rootNavigatorKey,
       path: '/product_details',
       name: AppRoute.productDetails,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final product = state.extra as ProductModel;
-        return DetailsScreen(product: product);
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: DetailsScreen(product: product),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SharedAxisTransition(
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              transitionType: SharedAxisTransitionType.scaled,
+              child: child,
+            );
+          },
+        );
       },
+    ),
+    GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
+      path: '/search',
+      name: AppRoute.search,
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const SearchForm(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SharedAxisTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            transitionType: SharedAxisTransitionType.vertical,
+            child: child,
+          );
+        },
+      ),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
