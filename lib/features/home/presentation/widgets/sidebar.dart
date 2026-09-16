@@ -42,8 +42,8 @@ class _SidebarNavState extends State<SidebarNav> {
           border: Border.all(color: Theme.of(context).colorScheme.primary),
         ),
         selectedItemDecoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.onPrimary,
-          border: Border.all(color: Theme.of(context).colorScheme.onPrimary),
+          color: Colors.white,
+          border: Border.all(color: Colors.white),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
         selectedIconTheme: IconThemeData(
@@ -65,9 +65,7 @@ class _SidebarNavState extends State<SidebarNav> {
                   const Gap(defaultPadding),
                   Text(
                     user?.email ?? "",
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
+                    style: const TextStyle(color: Colors.white),
                   ),
                   const Gap(defaultPadding),
                   const Divider(),
