@@ -1,24 +1,53 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 
-class BottomNav extends StatelessWidget {
+class BottomNav extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
 
   const BottomNav({required this.navigationShell, super.key});
 
+  @override
+  State<BottomNav> createState() => _BottomNavState();
+}
+
+class _BottomNavState extends State<BottomNav> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    });
+  }
+
   void _onItemTapped(int index) {
-    navigationShell.goBranch(
+    widget.navigationShell.goBranch(
       index,
-      initialLocation: index == navigationShell.currentIndex,
+      initialLocation: index == widget.navigationShell.currentIndex,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: SpinKitPouringHourGlassRefined(color: Colors.white),
+        ),
+      );
+    }
+
     return Scaffold(
-      body: navigationShell,
+      body: widget.navigationShell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
+        selectedIndex: widget.navigationShell.currentIndex,
         onDestinationSelected: _onItemTapped,
         destinations: const [
           NavigationDestination(
