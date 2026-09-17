@@ -12,7 +12,7 @@ class ProductCard extends StatelessWidget {
   });
   final String image, title;
   final VoidCallback press;
-  final int price;
+  final num price;
   final Color bgColor;
 
   @override
@@ -48,7 +48,13 @@ class ProductCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: defaultPadding / 4),
-                Text("\$$price", style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  "\$$price",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
               ],
             ),
           ],
