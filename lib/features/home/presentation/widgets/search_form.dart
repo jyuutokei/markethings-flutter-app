@@ -39,6 +39,40 @@ class _SearchFormState extends State<SearchForm> {
     return ['Result for "$query" #1', 'Result for "$query" #2'];
   }
 
+  void _modalBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true, // Adds the Material 3 drag indicator pill
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      enableDrag: true,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          height: 250,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Options', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.share),
+                title: const Text('Share Item'),
+                onTap: () => Navigator.pop(context), // Closes the sheet
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Delete Item'),
+                onTap: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,43 +97,7 @@ class _SearchFormState extends State<SearchForm> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      showDragHandle:
-                          true, // Adds the Material 3 drag indicator pill
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(24),
-                        ),
-                      ),
-                      builder: (BuildContext context) {
-                        return Container(
-                          padding: const EdgeInsets.all(16.0),
-                          height: 250,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Options',
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                              const SizedBox(height: 16),
-                              ListTile(
-                                leading: const Icon(Icons.share),
-                                title: const Text('Share Item'),
-                                onTap: () =>
-                                    Navigator.pop(context), // Closes the sheet
-                              ),
-                              ListTile(
-                                leading: const Icon(Icons.delete),
-                                title: const Text('Delete Item'),
-                                onTap: () => Navigator.pop(context),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
+                    _modalBottomSheet(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
