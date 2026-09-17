@@ -40,10 +40,12 @@ class _SidebarNavState extends State<SidebarNav> {
         selectedItemTextPadding: const EdgeInsets.only(left: 30),
         itemDecoration: BoxDecoration(
           border: Border.all(color: Theme.of(context).colorScheme.primary),
+          borderRadius: BorderRadius.circular(defaultBorderRadius),
         ),
         selectedItemDecoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(color: Colors.white),
+          borderRadius: BorderRadius.circular(defaultBorderRadius),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
         selectedIconTheme: IconThemeData(
