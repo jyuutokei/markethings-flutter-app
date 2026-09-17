@@ -14,7 +14,6 @@ ThemeData theme() {
       backgroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
-      iconTheme: IconThemeData(color: Color(0xff046ef4)),
       titleTextStyle: TextStyle(color: Colors.black, fontSize: 18),
     ),
     textTheme: ThemeData.light().textTheme.apply(
