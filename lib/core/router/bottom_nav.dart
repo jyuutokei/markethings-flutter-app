@@ -47,6 +47,9 @@ class _BottomNavState extends State<BottomNav> {
     return Scaffold(
       body: widget.navigationShell,
       bottomNavigationBar: NavigationBar(
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 0,
         selectedIndex: widget.navigationShell.currentIndex,
         onDestinationSelected: _onItemTapped,
         destinations: const [
