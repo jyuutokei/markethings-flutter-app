@@ -6,6 +6,7 @@ class ProductModel extends ProductEntity {
     required super.image,
     required super.title,
     required super.price,
+    super.quantity = 1,
     super.bgColor = const Color(0xFFEFEFF2),
   });
 }
