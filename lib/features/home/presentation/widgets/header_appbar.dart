@@ -29,7 +29,7 @@ class HeaderAppbar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           SvgPicture.asset("assets/icons/Location.svg"),
           const SizedBox(width: defaultPadding / 2),
-          Text(title, style: Theme.of(context).textTheme.bodyLarge),
+          Text(title),
         ],
       ),
       actions: [
