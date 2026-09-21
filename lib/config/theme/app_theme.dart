@@ -8,13 +8,17 @@ ThemeData theme() {
     colorScheme: ThemeData.light().colorScheme.copyWith(
       primary: const Color(0xff046ef4),
       secondary: const Color(0xff077eff),
-      onError: const Color(0xffd32f2f),
+      error: const Color(0xffd32f2f),
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
-      titleTextStyle: TextStyle(color: Colors.black, fontSize: 18),
+      titleTextStyle: TextStyle(
+        color: Colors.black,
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
     ),
     textTheme: ThemeData.light().textTheme.apply(
       bodyColor: Colors.black,
