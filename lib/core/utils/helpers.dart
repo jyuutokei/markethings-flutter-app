@@ -7,6 +7,18 @@ class AppHelpers {
   // Private constructor prevents instantiation of this class
   AppHelpers._();
 
+  static Color primaryColor(BuildContext context) {
+    return Theme.of(context).colorScheme.primary;
+  }
+
+  static Color secondaryColor(BuildContext context) {
+    return Theme.of(context).colorScheme.secondary;
+  }
+
+  static Color errorColor(BuildContext context) {
+    return Theme.of(context).colorScheme.error;
+  }
+
   static void showGlobalSnackBar(
     String title,
     String message,
