@@ -2,37 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:mt/features/home/domain/entities/product.dart';
 
 class ProductModel extends ProductEntity {
-  const ProductModel({
+  ProductModel({
     required super.image,
     required super.title,
     required super.price,
-    super.quantity = 1,
     super.bgColor = const Color(0xFFEFEFF2),
+    super.quantity = 1,
+    super.isFavorite = false,
   });
 }
 
 List<ProductModel> demoProduct = [
-  const ProductModel(
+  ProductModel(
     image: "assets/images/sample/product_0.png",
     title: "Long Sleeve Shirts",
     price: 165,
-    bgColor: Color(0xFFFEFBF9),
+    bgColor: const Color(0xFFFEFBF9),
   ),
-  const ProductModel(
+  ProductModel(
     image: "assets/images/sample/product_1.png",
     title: "Casual Henley Shirts",
     price: 99,
   ),
-  const ProductModel(
+  ProductModel(
     image: "assets/images/sample/product_2.png",
     title: "Curved Hem Shirts",
     price: 180,
-    bgColor: Color(0xFFF8FEFB),
+    bgColor: const Color(0xFFF8FEFB),
   ),
-  const ProductModel(
+  ProductModel(
     image: "assets/images/sample/product_3.png",
     title: "Casual Nolin",
     price: 149,
-    bgColor: Color(0xFFEEEEED),
+    bgColor: const Color(0xFFEEEEED),
   ),
 ];
