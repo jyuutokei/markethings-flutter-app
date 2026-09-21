@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:mt/core/constants/constants.dart';
+import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/injection_container.dart';
 import 'package:sidebarx/sidebarx.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -25,7 +26,7 @@ class _SidebarNavState extends State<SidebarNav> {
       theme: SidebarXTheme(
         margin: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
+          color: AppHelpers.primaryColor(context),
           borderRadius: BorderRadius.circular(20),
         ),
         hoverColor: Colors.white.withValues(alpha: 0.12),
@@ -33,13 +34,13 @@ class _SidebarNavState extends State<SidebarNav> {
         hoverIconTheme: const IconThemeData(color: Colors.white),
         textStyle: const TextStyle(color: Colors.white),
         selectedTextStyle: TextStyle(
-          color: Theme.of(context).colorScheme.primary,
+          color: AppHelpers.primaryColor(context),
           fontWeight: FontWeight.bold,
         ),
         itemTextPadding: const EdgeInsets.only(left: 30),
         selectedItemTextPadding: const EdgeInsets.only(left: 30),
         itemDecoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).colorScheme.primary),
+          border: Border.all(color: AppHelpers.primaryColor(context)),
           borderRadius: BorderRadius.circular(defaultBorderRadius),
         ),
         selectedItemDecoration: BoxDecoration(
@@ -49,12 +50,12 @@ class _SidebarNavState extends State<SidebarNav> {
         ),
         iconTheme: const IconThemeData(color: Colors.white),
         selectedIconTheme: IconThemeData(
-          color: Theme.of(context).colorScheme.primary,
+          color: AppHelpers.primaryColor(context),
         ),
       ),
       extendedTheme: SidebarXTheme(
         width: 200,
-        decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+        decoration: BoxDecoration(color: AppHelpers.primaryColor(context)),
       ),
       headerBuilder: (context, extended) {
         return SafeArea(
