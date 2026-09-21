@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:mt/core/constants/constants.dart';
+import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/data/models/product.dart';
 import 'package:mt/features/home/presentation/widgets/header_appbar.dart';
 import 'package:mt/features/home/presentation/widgets/sidebar.dart';
@@ -16,7 +17,7 @@ class Cart extends StatefulWidget {
 class _CartState extends State<Cart> {
   double get _total => demoProduct.fold(
     0,
-    (sum, product) => sum + (product.price) * (product.quantity),
+    (sum, product) => sum + (product.price * product.quantity),
   );
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -30,6 +31,7 @@ class _CartState extends State<Cart> {
       appBar: HeaderAppbar(scaffoldKey: _scaffoldKey, title: "Cart"),
       body: Column(
         children: [
+          const Gap(defaultPadding / 2),
           Expanded(
             child: ListView.builder(
               itemCount: demoProduct.length,
@@ -44,26 +46,49 @@ class _CartState extends State<Cart> {
                     ),
                   ),
                   background: Container(
-                    color: Theme.of(context).colorScheme.error,
+                    color: AppHelpers.errorColor(context),
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.only(right: defaultPadding),
                     child: const Icon(Icons.delete, color: Colors.white),
                   ),
                   child: Card(
+                    color: Colors.white,
                     margin: const EdgeInsets.symmetric(
                       horizontal: defaultPadding,
                       vertical: 4,
                     ),
                     child: ListTile(
+                      leading: Container(
+                        decoration: BoxDecoration(
+                          color: product.bgColor,
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(defaultBorderRadius),
+                          ),
+                        ),
+                        child: Image.asset(product.image, height: 132),
+                      ),
                       title: Text(product.title),
-                      subtitle: Text('\$${product.price}'),
+                      subtitle: Text(
+                        '\$${product.price}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppHelpers.primaryColor(context),
+                        ),
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.remove),
+                            icon: Icon(
+                              Icons.remove,
+                              color: AppHelpers.primaryColor(context),
+                            ),
                             onPressed: () {
-                              product.quantityAdd();
+                              setState(() {
+                                if (product.quantity > 1) {
+                                  product.quantity--;
+                                }
+                              });
                             },
                           ),
                           Text(
@@ -71,9 +96,14 @@ class _CartState extends State<Cart> {
                             style: const TextStyle(fontSize: 16),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.add),
+                            icon: Icon(
+                              Icons.add,
+                              color: AppHelpers.primaryColor(context),
+                            ),
                             onPressed: () {
-                              product.quantityReduce();
+                              setState(() {
+                                product.quantity++;
+                              });
                             },
                           ),
                         ],
