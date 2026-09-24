@@ -61,7 +61,7 @@ class _ProductCardState extends State<ProductCard> {
                     ),
                     const Gap(defaultPadding / 4),
                     Text(
-                      "\$${widget.price}",
+                      "₱${widget.price}",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: AppHelpers.primaryColor(context),
