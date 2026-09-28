@@ -29,7 +29,6 @@ class PopularProducts extends StatelessWidget {
                   title: demoProduct[index].title,
                   image: demoProduct[index].image,
                   price: demoProduct[index].price,
-                  bgColor: demoProduct[index].bgColor,
                   press: () {},
                 ),
               ),

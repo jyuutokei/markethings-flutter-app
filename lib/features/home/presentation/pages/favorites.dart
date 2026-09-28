@@ -44,7 +44,6 @@ class _FavoritesState extends State<Favorites> {
             title: demoProduct[index].title,
             image: demoProduct[index].image,
             price: demoProduct[index].price,
-            bgColor: demoProduct[index].bgColor,
             press: () {
               context.pushNamed(
                 AppRoute.productDetails,
