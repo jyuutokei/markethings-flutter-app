@@ -3,7 +3,6 @@ import 'package:mt/core/constants/constants.dart';
 import 'package:mt/features/home/presentation/widgets/categories.dart';
 import 'package:mt/features/home/presentation/widgets/header_appbar.dart';
 import 'package:mt/features/home/presentation/widgets/new_arrival_products.dart';
-import 'package:mt/features/home/presentation/widgets/popular_products.dart';
 import 'package:mt/features/home/presentation/widgets/search_form_fake.dart';
 import 'package:mt/features/home/presentation/widgets/sidebar.dart';
 import 'package:sidebarx/sidebarx.dart';
@@ -44,7 +43,6 @@ class _HomeState extends State<Home> {
             ),
             Categories(),
             NewArrivalProducts(),
-            PopularProducts(),
           ],
         ),
       ),
