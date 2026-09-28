@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mt/core/constants/constants.dart';
+import 'package:mt/injection_container.dart';
 
 const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
   borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -18,20 +20,27 @@ class SearchForm extends StatefulWidget {
 class _SearchFormState extends State<SearchForm> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
+  final _debouncer = sl<Debouncer>();
   List<String> _results = [];
 
   @override
   void dispose() {
+    _debouncer.cancel();
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
   }
 
   void _onQueryChanged(String query) {
-    // TODO: debounce this in real usage (see note below)
-    setState(() {
-      _results = _search(query);
-    });
+    const duration = Duration(milliseconds: 300);
+    _debouncer.debounce(
+      duration: duration,
+      onDebounce: () {
+        setState(() {
+          _results = _search(query);
+        });
+      },
+    );
   }
 
   List<String> _search(String query) {
@@ -58,12 +67,12 @@ class _SearchFormState extends State<SearchForm> {
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.share),
-                title: const Text('Share Item'),
+                title: const Text('Wla pakoy'),
                 onTap: () => Navigator.pop(context), // Closes the sheet
               ),
               ListTile(
                 leading: const Icon(Icons.delete),
-                title: const Text('Delete Item'),
+                title: const Text('Tarong na idea'),
                 onTap: () => Navigator.pop(context),
               ),
             ],
