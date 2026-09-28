@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:intl/intl.dart';
+import 'package:mt/injection_container.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 final rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
@@ -69,5 +71,9 @@ class AppHelpers {
       symbol: '₱',
       decimalDigits: 2,
     ).format(price);
+  }
+
+  static TalkerLogger logger() {
+    return sl<TalkerLogger>();
   }
 }
