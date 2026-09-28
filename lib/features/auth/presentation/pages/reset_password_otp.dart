@@ -31,7 +31,6 @@ class _ResetPasswordOtpState extends State<ResetPasswordOtp> {
   final _confirmNewPwdController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final _supabase = sl<SupabaseClient>();
-  final logger = sl<TalkerLogger>();
   bool _isLoading = false;
   static const _cooldownDuration = Duration(seconds: 60);
   String get _cooldownKey => 'resetpwd_otp_cooldown_${widget.email}';
@@ -160,7 +159,7 @@ class _ResetPasswordOtpState extends State<ResetPasswordOtp> {
           error.message,
           ContentType.failure,
         );
-        logger.error('Resend OTP error: $error');
+        AppHelpers.logger().error('Resend OTP error: $error');
       }
     } finally {
       if (mounted) {
@@ -206,7 +205,7 @@ class _ResetPasswordOtpState extends State<ResetPasswordOtp> {
           error.message,
           ContentType.failure,
         );
-        logger.error('OTP verification error: $error');
+        AppHelpers.logger().error('OTP verification error: $error');
       }
     } finally {
       if (mounted) {

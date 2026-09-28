@@ -7,9 +7,7 @@ import 'package:mt/config/env/env.dart';
 import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/router/routes.dart';
 import 'package:mt/core/utils/helpers.dart';
-import 'package:mt/injection_container.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
-import 'package:talker_flutter/talker_flutter.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -19,7 +17,6 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final logger = sl<TalkerLogger>();
   bool _isSigningIn = true;
   bool _hasOpenedResetOtp = false;
 
@@ -146,7 +143,7 @@ class _LoginState extends State<Login> {
                   message,
                   ContentType.failure,
                 );
-                logger.error(message);
+                AppHelpers.logger().error(message);
               },
             ),
           ),
@@ -183,7 +180,7 @@ class _LoginState extends State<Login> {
                   message,
                   ContentType.failure,
                 );
-                logger.error('Auth error: $error');
+                AppHelpers.logger().error('Auth error: $error');
               },
             ),
           ),

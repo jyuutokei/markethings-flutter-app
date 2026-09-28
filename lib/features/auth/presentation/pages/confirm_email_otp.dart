@@ -11,7 +11,6 @@ import 'package:mt/injection_container.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:talker_flutter/talker_flutter.dart';
 
 class ConfirmEmailOtp extends StatefulWidget {
   final String email;
@@ -26,7 +25,6 @@ class ConfirmEmailOtp extends StatefulWidget {
 class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
   final PinInputController _otpController = PinInputController();
   final _supabase = sl<SupabaseClient>();
-  final logger = sl<TalkerLogger>();
   bool _isLoading = false;
   static const _cooldownDuration = Duration(seconds: 60);
   String get _cooldownKey => 'confirm_otp_cooldown_${widget.email}';
@@ -154,7 +152,7 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
           error.message,
           ContentType.failure,
         );
-        logger.error('Resend OTP error: $error');
+        AppHelpers.logger().error('Resend OTP error: $error');
       }
     } finally {
       if (mounted) {
@@ -190,7 +188,7 @@ class _ConfirmEmailOtpState extends State<ConfirmEmailOtp> {
           error.message,
           ContentType.failure,
         );
-        logger.error('OTP verification error: $error');
+        AppHelpers.logger().error('OTP verification error: $error');
       }
     } finally {
       if (mounted) {
