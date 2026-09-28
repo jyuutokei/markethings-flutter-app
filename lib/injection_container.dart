@@ -1,6 +1,11 @@
+import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mt/features/auth/data/repository/auth_repo_impl.dart';
 import 'package:mt/features/auth/domain/repository/auth_repo.dart';
+import 'package:mt/features/home/data/datasources/product_card_remote_data_source.dart';
+import 'package:mt/features/home/data/repositories/product_card_repository_impl.dart';
+import 'package:mt/features/home/domain/repositories/product_card_repository.dart';
+import 'package:mt/features/home/domain/usecases/get_product_card_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 import 'package:mt/config/env/env.dart';
@@ -9,7 +14,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 final sl = GetIt.instance;
 
 void setupLocator() async {
-  //supabase
+  // supabase
   await Supabase.initialize(url: Env.spbUrl, publishableKey: Env.spbPbkey);
   sl.registerSingleton<SupabaseClient>(Supabase.instance.client);
   sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl(sl<SupabaseClient>()));
@@ -22,4 +27,25 @@ void setupLocator() async {
   // shared preference
   final sharedPreference = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(sharedPreference);
+
+  // debouncer
+  sl.registerLazySingleton<Debouncer>(() => Debouncer());
+
+  // datasource/repo/usecase
+  // code order is necessary: datasource -> repo -> usecase
+
+  // datasources
+  sl.registerLazySingleton<ProductCardRemoteDataSource>(
+    () => ProductCardRemoteDataSourceImpl(sl<SupabaseClient>()),
+  );
+
+  // repositories
+  sl.registerLazySingleton<ProductCardRepository>(
+    () => ProductCardRepositoryImpl(sl<ProductCardRemoteDataSource>()),
+  );
+
+  // usecases
+  sl.registerLazySingleton<GetProductCardDetails>(
+    () => GetProductCardDetails(sl<ProductCardRepository>()),
+  );
 }
