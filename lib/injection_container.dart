@@ -2,9 +2,13 @@ import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mt/features/auth/data/repository/auth_repo_impl.dart';
 import 'package:mt/features/auth/domain/repository/auth_repo.dart';
+import 'package:mt/features/home/data/datasources/category_remote_data_source.dart';
 import 'package:mt/features/home/data/datasources/product_card_remote_data_source.dart';
+import 'package:mt/features/home/data/repositories/category_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/product_card_repository_impl.dart';
+import 'package:mt/features/home/domain/repositories/category_repository.dart';
 import 'package:mt/features/home/domain/repositories/product_card_repository.dart';
+import 'package:mt/features/home/domain/usecases/get_categories.dart';
 import 'package:mt/features/home/domain/usecases/get_product_card_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -38,14 +42,23 @@ void setupLocator() async {
   sl.registerLazySingleton<ProductCardRemoteDataSource>(
     () => ProductCardRemoteDataSourceImpl(sl<SupabaseClient>()),
   );
+  sl.registerLazySingleton<CategoryRemoteDataSource>(
+    () => CategoryRemoteDataSourceImpl(sl<SupabaseClient>()),
+  );
 
   // repositories
   sl.registerLazySingleton<ProductCardRepository>(
     () => ProductCardRepositoryImpl(sl<ProductCardRemoteDataSource>()),
   );
+  sl.registerLazySingleton<CategoryRepository>(
+    () => CategoryRepositoryImpl(sl<CategoryRemoteDataSource>()),
+  );
 
   // usecases
   sl.registerLazySingleton<GetProductCardDetails>(
     () => GetProductCardDetails(sl<ProductCardRepository>()),
+  );
+  sl.registerLazySingleton<GetCategories>(
+    () => GetCategories(sl<CategoryRepository>()),
   );
 }
