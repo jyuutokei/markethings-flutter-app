@@ -13,7 +13,6 @@ import 'package:mt/injection_container.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:talker_flutter/talker_flutter.dart';
 
 class ResetPasswordOtp extends StatefulWidget {
   final String email;
