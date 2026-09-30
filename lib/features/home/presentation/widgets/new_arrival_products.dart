@@ -1,8 +1,8 @@
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mt/core/constants/constants.dart';
-import 'package:mt/core/utils/helpers.dart';
+import 'package:mt/core/router/routes.dart';
 import 'package:mt/features/home/domain/entities/product_card_entity.dart';
 import 'package:mt/features/home/domain/usecases/get_product_card_details.dart';
 import 'package:mt/features/home/presentation/widgets/product_card.dart';
@@ -51,11 +51,11 @@ class NewArrivalProducts extends StatelessWidget {
                   image: productCardDetail.mainImageUrl,
                   price: productCardDetail.price,
                   press: () {
-                    AppHelpers.showSnackBar(
-                      context,
-                      "Waw",
-                      "Di pa maggana dong.",
-                      ContentType.help,
+                    context.pushNamed(
+                      AppRoute.productDetails,
+                      pathParameters: {
+                        'productId': productCardDetail.id.toString(),
+                      },
                     );
                   },
                 );
