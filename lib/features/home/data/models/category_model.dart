@@ -5,12 +5,12 @@ class CategoryModel extends CategoryEntity {
     required super.id,
     required super.name,
     required super.slug,
-    super.imageUrl,
+    required super.imageUrl,
   });
 
   factory CategoryModel.fromJson(
     Map<String, dynamic> json, {
-    required String? imageUrl,
+    required String imageUrl,
   }) {
     return CategoryModel(
       id: json['id'] as int,
