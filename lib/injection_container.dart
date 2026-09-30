@@ -4,12 +4,16 @@ import 'package:mt/features/auth/data/repository/auth_repo_impl.dart';
 import 'package:mt/features/auth/domain/repository/auth_repo.dart';
 import 'package:mt/features/home/data/datasources/category_remote_data_source.dart';
 import 'package:mt/features/home/data/datasources/product_card_remote_data_source.dart';
+import 'package:mt/features/home/data/datasources/product_details_remote_data_source.dart';
 import 'package:mt/features/home/data/repositories/category_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/product_card_repository_impl.dart';
+import 'package:mt/features/home/data/repositories/product_details_repository_impl.dart';
 import 'package:mt/features/home/domain/repositories/category_repository.dart';
 import 'package:mt/features/home/domain/repositories/product_card_repository.dart';
+import 'package:mt/features/home/domain/repositories/product_details_repository.dart';
 import 'package:mt/features/home/domain/usecases/get_categories.dart';
 import 'package:mt/features/home/domain/usecases/get_product_card_details.dart';
+import 'package:mt/features/home/domain/usecases/get_product_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 import 'package:mt/config/env/env.dart';
@@ -45,6 +49,9 @@ void setupLocator() async {
   sl.registerLazySingleton<CategoryRemoteDataSource>(
     () => CategoryRemoteDataSourceImpl(sl<SupabaseClient>()),
   );
+  sl.registerLazySingleton<ProductDetailsRemoteDataSource>(
+    () => ProductDetailsRemoteDataSourceImpl(sl<SupabaseClient>()),
+  );
 
   // repositories
   sl.registerLazySingleton<ProductCardRepository>(
@@ -53,6 +60,9 @@ void setupLocator() async {
   sl.registerLazySingleton<CategoryRepository>(
     () => CategoryRepositoryImpl(sl<CategoryRemoteDataSource>()),
   );
+  sl.registerLazySingleton<ProductDetailsRepository>(
+    () => ProductDetailsRepositoryImpl(sl<ProductDetailsRemoteDataSource>()),
+  );
 
   // usecases
   sl.registerLazySingleton<GetProductCardDetails>(
@@ -60,5 +70,8 @@ void setupLocator() async {
   );
   sl.registerLazySingleton<GetCategories>(
     () => GetCategories(sl<CategoryRepository>()),
+  );
+  sl.registerLazySingleton<GetProductDetails>(
+    () => GetProductDetails(sl<ProductDetailsRepository>()),
   );
 }
