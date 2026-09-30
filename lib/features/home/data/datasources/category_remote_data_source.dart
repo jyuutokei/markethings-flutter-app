@@ -8,12 +8,11 @@ abstract class CategoryRemoteDataSource {
 
 class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
   final SupabaseClient _client;
-  static const _bucket = 'categories';
+  static const _bucket = 'category_images';
 
   const CategoryRemoteDataSourceImpl(this._client);
 
-  String? _toPublicUrl(String? path) {
-    if (path == null || path.isEmpty) return null;
+  String _toPublicUrl(String path) {
     return _client.storage.from(_bucket).getPublicUrl(path);
   }
 
@@ -28,7 +27,7 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
           .map(
             (row) => CategoryModel.fromJson(
               row as Map<String, dynamic>,
-              imageUrl: _toPublicUrl(row['image_path'] as String?),
+              imageUrl: _toPublicUrl(row['image_path'] as String),
             ),
           )
           .toList();
