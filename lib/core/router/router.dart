@@ -9,7 +9,6 @@ import 'package:mt/features/auth/presentation/pages/confirm_email_otp.dart';
 import 'package:mt/features/auth/presentation/pages/reset_password_otp.dart';
 import 'package:mt/features/error/presentation/error404.dart';
 import 'package:mt/features/auth/presentation/pages/login.dart';
-import 'package:mt/features/home/data/models/product.dart';
 import 'package:mt/features/home/presentation/pages/cart.dart';
 import 'package:mt/features/home/presentation/pages/details.dart';
 import 'package:mt/features/home/presentation/pages/favorites.dart';
@@ -77,13 +76,13 @@ final goRouter = GoRouter(
     ),
     GoRoute(
       parentNavigatorKey: rootNavigatorKey,
-      path: '/product_details',
+      path: '/product_details/:productId',
       name: AppRoute.productDetails,
       pageBuilder: (context, state) {
-        final product = state.extra as ProductModel;
+        final productId = state.pathParameters['productId'] as String;
         return CustomTransitionPage(
           key: state.pageKey,
-          child: DetailsScreen(product: product),
+          child: Details(productId: productId),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return SharedAxisTransition(
               animation: animation,
