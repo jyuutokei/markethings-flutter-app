@@ -2,15 +2,19 @@ import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mt/features/auth/data/repository/auth_repo_impl.dart';
 import 'package:mt/features/auth/domain/repository/auth_repo.dart';
+import 'package:mt/features/home/data/datasources/cart_item_remote_data_source.dart';
 import 'package:mt/features/home/data/datasources/category_remote_data_source.dart';
 import 'package:mt/features/home/data/datasources/product_card_remote_data_source.dart';
 import 'package:mt/features/home/data/datasources/product_details_remote_data_source.dart';
+import 'package:mt/features/home/data/repositories/cart_item_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/category_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/product_card_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/product_details_repository_impl.dart';
+import 'package:mt/features/home/domain/repositories/cart_item_repository.dart';
 import 'package:mt/features/home/domain/repositories/category_repository.dart';
 import 'package:mt/features/home/domain/repositories/product_card_repository.dart';
 import 'package:mt/features/home/domain/repositories/product_details_repository.dart';
+import 'package:mt/features/home/domain/usecases/add_cart_item.dart';
 import 'package:mt/features/home/domain/usecases/get_categories.dart';
 import 'package:mt/features/home/domain/usecases/get_product_card_details.dart';
 import 'package:mt/features/home/domain/usecases/get_product_details.dart';
@@ -52,6 +56,9 @@ void setupLocator() async {
   sl.registerLazySingleton<ProductDetailsRemoteDataSource>(
     () => ProductDetailsRemoteDataSourceImpl(sl<SupabaseClient>()),
   );
+  sl.registerLazySingleton<CartItemRemoteDataSource>(
+    () => CartItemRemoteDataSourceImpl(sl<SupabaseClient>()),
+  );
 
   // repositories
   sl.registerLazySingleton<ProductCardRepository>(
@@ -63,6 +70,9 @@ void setupLocator() async {
   sl.registerLazySingleton<ProductDetailsRepository>(
     () => ProductDetailsRepositoryImpl(sl<ProductDetailsRemoteDataSource>()),
   );
+  sl.registerLazySingleton<CartItemRepository>(
+    () => CartItemRepositoryImpl(sl<CartItemRemoteDataSource>()),
+  );
 
   // usecases
   sl.registerLazySingleton<GetProductCardDetails>(
@@ -73,5 +83,8 @@ void setupLocator() async {
   );
   sl.registerLazySingleton<GetProductDetails>(
     () => GetProductDetails(sl<ProductDetailsRepository>()),
+  );
+  sl.registerLazySingleton<AddCartItem>(
+    () => AddCartItem(sl<CartItemRepository>()),
   );
 }
