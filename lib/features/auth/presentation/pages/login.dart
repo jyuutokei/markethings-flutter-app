@@ -35,8 +35,8 @@ class _LoginState extends State<Login> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
             child: SupaEmailAuth(
-              key: ValueKey(_isSigningIn),
-              isInitiallySigningIn: _isSigningIn,
+              // key: ValueKey(_isSigningIn),
+              isInitiallySigningIn: true,
               showSnackBars: false,
               showConfirmPasswordField: true,
               passwordValidator: (value) {
