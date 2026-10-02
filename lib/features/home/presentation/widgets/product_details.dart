@@ -1,13 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/product_details_entity.dart';
-import 'package:mt/features/home/presentation/widgets/color_dot.dart';
 
-class ProductDetails extends StatelessWidget {
+class ProductDetails extends StatefulWidget {
   final ProductDetailsEntity productDetails;
+  final int? selectedVariantIndex;
+  final ValueChanged<int?> onVariantSelected;
 
-  const ProductDetails({super.key, required this.productDetails});
+  const ProductDetails({
+    super.key,
+    required this.productDetails,
+    this.selectedVariantIndex,
+    required this.onVariantSelected,
+  });
+
+  @override
+  State<ProductDetails> createState() => _ProductDetailsState();
+}
+
+class _ProductDetailsState extends State<ProductDetails> {
+  List<VariantEntity> get variants => widget.productDetails.variants;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  String priceLabel() {
+    if (widget.selectedVariantIndex != null) {
+      return AppHelpers.pesoFormatter(
+        variants[widget.selectedVariantIndex!].price,
+      );
+    }
+
+    if (variants.length == 1) {
+      return AppHelpers.pesoFormatter(variants.first.price);
+    }
+
+    return "${AppHelpers.pesoFormatter(variants.first.price)} - "
+        "${AppHelpers.pesoFormatter(variants.last.price)}";
+  }
+
+  String stockQuantityLabel() {
+    if (widget.selectedVariantIndex == null) {
+      return "Select a variant";
+    }
+
+    return "${variants[widget.selectedVariantIndex!].stockQuantity} pieces available";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,49 +82,81 @@ class ProductDetails extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        productDetails.title,
-                        style: Theme.of(context).textTheme.titleLarge,
+                Text(
+                  priceLabel(),
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
+                    color: AppHelpers.primaryColor(context),
+                  ),
+                ),
+                const Gap(defaultPadding),
+                Text(
+                  widget.productDetails.title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const Gap(defaultPadding * 2),
+                const Text(
+                  "Variants",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const Gap(defaultPadding / 2),
+                Wrap(
+                  spacing: defaultPadding / 2,
+                  runSpacing: defaultPadding / 2,
+                  alignment: WrapAlignment.start,
+                  children: List.generate(
+                    variants.length,
+                    (index) => ChoiceChip(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: defaultPadding / 2,
+                        vertical: defaultPadding / 4,
                       ),
-                    ),
-                    const SizedBox(width: defaultPadding),
-                    Text(
-                      AppHelpers.pesoFormatter(
-                        productDetails.variants[1].price,
+                      shape: const StadiumBorder(),
+                      avatar: Image.asset(
+                        "assets/images/sample/product_0.png",
+                        width: 25,
+                        height: 25,
+                        fit: BoxFit.cover,
                       ),
-                      style: Theme.of(context).textTheme.titleLarge,
+                      label: Text(
+                        widget.productDetails.variants[index].name,
+                        softWrap: true,
+                      ),
+                      labelStyle: TextStyle(
+                        color: widget.selectedVariantIndex == index
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                      side: const BorderSide(color: Colors.black12, width: 1),
+                      selected: widget.selectedVariantIndex == index,
+                      onSelected: variants[index].stockQuantity == 0
+                          ? null
+                          : (selected) {
+                              widget.onVariantSelected(selected ? index : null);
+                            },
+                      selectedColor: AppHelpers.primaryColor(context),
+                      showCheckmark: false,
                     ),
-                  ],
+                  ),
+                ),
+                const Gap(defaultPadding / 2),
+                const Text(
+                  "Stock quantity:",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(stockQuantityLabel()),
+                const Gap(defaultPadding * 2),
+                const Text(
+                  "Description",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: defaultPadding),
-                  child: Text(productDetails.description ?? "No description"),
-                ),
-                Text("Colors", style: Theme.of(context).textTheme.titleSmall),
-                const SizedBox(height: defaultPadding / 2),
-                const Row(
-                  children: [
-                    ColorDot(color: Color(0xFFBEE8EA), isActive: false),
-                    ColorDot(color: Color(0xFF141B4A), isActive: true),
-                    ColorDot(color: Color(0xFFF4E5C3), isActive: false),
-                  ],
-                ),
-                const SizedBox(height: defaultPadding * 2),
-                Center(
-                  child: SizedBox(
-                    width: 200,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        shape: const StadiumBorder(),
-                      ),
-                      child: const Text("Add to Cart"),
-                    ),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: defaultPadding / 2,
+                  ),
+                  child: Text(
+                    widget.productDetails.description ?? "No description",
                   ),
                 ),
               ],
