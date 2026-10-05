@@ -43,7 +43,7 @@ class ProductDetailsModel extends ProductDetailsEntity {
       title: json['title'] as String,
       description: json['description'] as String?,
       mainImageUrl: json['main_image_url'] as String?,
-      variants: (json['product_variants'] as List)
+      variants: (json['variants'] as List)
           .map((v) => VariantModel.fromJson(v as Map<String, dynamic>))
           .toList(),
     );
