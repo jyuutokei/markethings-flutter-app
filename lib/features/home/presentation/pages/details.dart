@@ -8,6 +8,7 @@ import 'package:mt/features/home/domain/usecases/get_product_details.dart';
 import 'package:mt/features/home/presentation/widgets/product_details.dart';
 import 'package:mt/injection_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 
 class Details extends StatefulWidget {
   final String productId;
@@ -21,6 +22,7 @@ class Details extends StatefulWidget {
 class _DetailsState extends State<Details> {
   late Future<ProductDetailsEntity> _productDetailsFuture;
   int? _selectedVariantIndex;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -61,6 +63,40 @@ class _DetailsState extends State<Details> {
     setState(() {
       _selectedVariantIndex = index;
     });
+  }
+
+  Future<void> _onAddToCart(
+    ProductDetailsEntity productDetails,
+    int variantIndex,
+  ) async {
+    setState(() => _isLoading = true);
+    try {
+      await sl<AddCartItem>().call(
+        variantId: productDetails.variants[variantIndex].id,
+      );
+
+      if (mounted) {
+        AppHelpers.showSnackBar(
+          context,
+          "Added to cart",
+          "Item added to cart successfully.",
+          ContentType.success,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        AppHelpers.showSnackBar(
+          context,
+          "Error",
+          "Failed to add item to cart.",
+          ContentType.failure,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -112,12 +148,11 @@ class _DetailsState extends State<Details> {
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: canAddToCart
-                            ? () async {
-                                await sl<AddCartItem>().call(
-                                  variantId: productDetails
-                                      .variants[_selectedVariantIndex!]
-                                      .id,
+                        onPressed: canAddToCart || _isLoading
+                            ? () {
+                                _onAddToCart(
+                                  productDetails,
+                                  _selectedVariantIndex!,
                                 );
                               }
                             : null,
