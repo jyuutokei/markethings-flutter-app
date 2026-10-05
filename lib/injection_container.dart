@@ -15,6 +15,7 @@ import 'package:mt/features/home/domain/repositories/category_repository.dart';
 import 'package:mt/features/home/domain/repositories/product_card_repository.dart';
 import 'package:mt/features/home/domain/repositories/product_details_repository.dart';
 import 'package:mt/features/home/domain/usecases/add_cart_item.dart';
+import 'package:mt/features/home/domain/usecases/get_cart_item_details.dart';
 import 'package:mt/features/home/domain/usecases/get_categories.dart';
 import 'package:mt/features/home/domain/usecases/get_product_card_details.dart';
 import 'package:mt/features/home/domain/usecases/get_product_details.dart';
@@ -86,5 +87,8 @@ void setupLocator() async {
   );
   sl.registerLazySingleton<AddCartItem>(
     () => AddCartItem(sl<CartItemRepository>()),
+  );
+  sl.registerLazySingleton<GetCartItemDetails>(
+    () => GetCartItemDetails(sl<CartItemRepository>()),
   );
 }
