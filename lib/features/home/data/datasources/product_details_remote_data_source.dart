@@ -19,10 +19,10 @@ class ProductDetailsRemoteDataSourceImpl
           .from('products')
           .select(
             'id, title, category_id, seller_id, description, main_image_url, '
-            'product_variants(id, product_id, name, price, image_url, stock_quantity, attributes)',
+            'variants:product_variants(id, product_id, name, price, image_url, stock_quantity, attributes)',
           )
           .eq('id', productId)
-          .order('price', referencedTable: 'product_variants', ascending: true)
+          .order('price', referencedTable: 'variants', ascending: true)
           .single();
 
       return ProductDetailsModel.fromJson(response);
