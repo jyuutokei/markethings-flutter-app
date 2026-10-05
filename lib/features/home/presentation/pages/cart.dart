@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gap/gap.dart';
 import 'package:mt/core/constants/constants.dart';
-import 'package:mt/core/utils/helpers.dart';
-import 'package:mt/features/home/data/models/product.dart';
+import 'package:mt/features/home/domain/entities/cart_item_details_entity.dart';
+import 'package:mt/features/home/domain/usecases/get_cart_item_details.dart';
+import 'package:mt/features/home/presentation/widgets/cart_item_card.dart';
 import 'package:mt/features/home/presentation/widgets/header_appbar.dart';
 import 'package:mt/features/home/presentation/widgets/sidebar.dart';
+import 'package:mt/injection_container.dart';
 import 'package:sidebarx/sidebarx.dart';
 
 class Cart extends StatefulWidget {
@@ -15,13 +18,21 @@ class Cart extends StatefulWidget {
 }
 
 class _CartState extends State<Cart> {
-  double get _total => demoProduct.fold(
-    0,
-    (sum, product) => sum + (product.price * product.quantity),
-  );
+  late Future<List<CartItemDetailsEntity>> _cartItemsFuture;
+
+  // double get _total => demoProduct.fold(
+  //   0,
+  //   (sum, product) => sum + (product.price * product.quantity),
+  // );
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _sbxController = SidebarXController(selectedIndex: 0, extended: true);
+
+  @override
+  void initState() {
+    super.initState();
+    _cartItemsFuture = sl<GetCartItemDetails>().call();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,84 +44,31 @@ class _CartState extends State<Cart> {
         children: [
           const Gap(defaultPadding / 2),
           Expanded(
-            child: ListView.builder(
-              itemCount: demoProduct.length,
-              itemBuilder: (context, index) {
-                final product = demoProduct[index];
-                return Dismissible(
-                  key: Key(product.title),
-                  direction: DismissDirection.endToStart,
-                  onDismissed: (_) => setState(
-                    () => demoProduct.removeWhere(
-                      (x) => x.title == product.title,
-                    ),
-                  ),
-                  background: Container(
-                    color: AppHelpers.errorColor(context),
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: defaultPadding),
-                    child: const Icon(Icons.delete, color: Colors.white),
-                  ),
-                  child: Card(
-                    color: Colors.white,
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: defaultPadding,
-                      vertical: 4,
-                    ),
-                    child: ListTile(
-                      leading: Container(
-                        decoration: BoxDecoration(
-                          color: product.bgColor,
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(defaultBorderRadius),
-                          ),
-                        ),
-                        child: Image.asset(product.image, height: 132),
-                      ),
-                      title: Text(product.title),
-                      subtitle: Text(
-                        '\$${product.price}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppHelpers.primaryColor(context),
-                        ),
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              Icons.remove,
-                              color: AppHelpers.primaryColor(context),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                if (product.quantity > 1) {
-                                  product.quantity--;
-                                }
-                              });
-                            },
-                          ),
-                          Text(
-                            "${product.quantity}",
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.add,
-                              color: AppHelpers.primaryColor(context),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                product.quantity++;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
+            child: FutureBuilder(
+              future: _cartItemsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: SpinKitPianoWave(color: Colors.white),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                final cartItems = snapshot.data ?? [];
+
+                return cartItems.isNotEmpty
+                    ? ListView.builder(
+                        itemCount: cartItems.length,
+                        itemBuilder: (context, index) {
+                          final cartItem = cartItems[index];
+
+                          return CartItemCard(cartItem: cartItem);
+                        },
+                      )
+                    : const Center(child: Text("No items added to cart yet."));
               },
             ),
           ),
@@ -125,10 +83,7 @@ class _CartState extends State<Cart> {
                       'Total',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    Text(
-                      "\$${_total.toStringAsFixed(2)}",
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
+                    Text("", style: Theme.of(context).textTheme.titleLarge),
                   ],
                 ),
                 const Gap(defaultPadding / 2),
