@@ -1,4 +1,4 @@
-import 'package:mt/features/home/domain/entities/cart_item_entity.dart';
+import 'package:mt/features/home/domain/entities/cart_item_add_entity.dart';
 import 'package:mt/features/home/domain/repositories/cart_item_repository.dart';
 
 class AddCartItem {
@@ -6,7 +6,7 @@ class AddCartItem {
 
   const AddCartItem(this.repository);
 
-  Future<CartItemEntity> call({required int variantId, int quantity = 1}) {
-    return repository.addItem(variantId: variantId, quantity: quantity);
+  Future<CartItemAddEntity> call({required int variantId}) {
+    return repository.addCartItem(variantId: variantId);
   }
 }
