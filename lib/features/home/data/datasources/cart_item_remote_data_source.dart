@@ -4,7 +4,10 @@ import 'package:mt/features/home/data/models/cart_item_details_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class CartItemRemoteDataSource {
-  Future<CartItemAddModel> addCartItem({required int variantId});
+  Future<CartItemAddModel> adjustCartItemQuantity({
+    required int variantId,
+    required int quantityValue,
+  });
   Future<List<CartItemDetailsModel>> getCartItemDetails();
 }
 
@@ -14,11 +17,14 @@ class CartItemRemoteDataSourceImpl implements CartItemRemoteDataSource {
   CartItemRemoteDataSourceImpl(this._client);
 
   @override
-  Future<CartItemAddModel> addCartItem({required int variantId}) async {
+  Future<CartItemAddModel> adjustCartItemQuantity({
+    required int variantId,
+    required int quantityValue,
+  }) async {
     try {
       final response = await _client.rpc(
-        'add_cart_item',
-        params: {'p_variant_id': variantId},
+        'adjust_cart_item_quantity',
+        params: {'p_variant_id': variantId, 'p_delta': quantityValue},
       );
 
       if (response is! Map) {
