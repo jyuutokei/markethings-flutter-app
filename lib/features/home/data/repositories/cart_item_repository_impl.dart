@@ -9,8 +9,14 @@ class CartItemRepositoryImpl implements CartItemRepository {
   const CartItemRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<CartItemAddEntity> addCartItem({required int variantId}) {
-    return remoteDataSource.addCartItem(variantId: variantId);
+  Future<CartItemAddEntity> adjustCartItemQuantity({
+    required int variantId,
+    required int quantityValue,
+  }) {
+    return remoteDataSource.adjustCartItemQuantity(
+      variantId: variantId,
+      quantityValue: quantityValue,
+    );
   }
 
   @override
