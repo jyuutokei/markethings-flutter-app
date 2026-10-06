@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mt/core/router/tab_refresher.dart';
+import 'package:mt/core/router/routes.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/product_details_entity.dart';
-import 'package:mt/features/home/domain/usecases/add_cart_item.dart';
+import 'package:mt/features/home/domain/usecases/adjust_cart_item_quantity.dart';
 import 'package:mt/features/home/domain/usecases/get_product_details.dart';
 import 'package:mt/features/home/presentation/widgets/product_details.dart';
 import 'package:mt/injection_container.dart';
@@ -71,8 +74,9 @@ class _DetailsState extends State<Details> {
   ) async {
     setState(() => _isLoading = true);
     try {
-      await sl<AddCartItem>().call(
+      await sl<AdjustCartItemQuantity>().call(
         variantId: productDetails.variants[variantIndex].id,
+        quantityValue: 1,
       );
 
       if (mounted) {
@@ -83,7 +87,7 @@ class _DetailsState extends State<Details> {
           ContentType.success,
         );
       }
-    } catch (e) {
+    } catch (error) {
       if (mounted) {
         AppHelpers.showSnackBar(
           context,
@@ -117,7 +121,12 @@ class _DetailsState extends State<Details> {
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            leading: const BackButton(color: Colors.black),
+            leading: BackButton(
+              color: Colors.black,
+              onPressed: () {
+                homeTabRefresher.notifyHomeTabSelected();
+              },
+            ),
             actions: [
               IconButton(
                 onPressed: () {},
@@ -125,6 +134,13 @@ class _DetailsState extends State<Details> {
                   backgroundColor: Colors.white,
                   child: SvgPicture.asset("assets/icons/Heart.svg", height: 20),
                 ),
+              ),
+              IconButton(
+                onPressed: () {
+                  cartTabRefresher.notifyCartTabSelected();
+                  context.goNamed(AppRoute.cart);
+                },
+                icon: const Icon(Icons.shopping_cart),
               ),
             ],
           ),
