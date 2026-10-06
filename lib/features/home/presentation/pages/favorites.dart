@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mt/core/constants/constants.dart';
-import 'package:mt/core/router/routes.dart';
-import 'package:mt/features/home/data/models/product.dart';
 import 'package:mt/features/home/presentation/widgets/header_appbar.dart';
-import 'package:mt/features/home/presentation/widgets/product_card.dart';
 import 'package:mt/features/home/presentation/widgets/sidebar.dart';
 import 'package:sidebarx/sidebarx.dart';
 
@@ -34,23 +30,7 @@ class _FavoritesState extends State<Favorites> {
           mainAxisSpacing: defaultPadding,
         ),
         itemBuilder: (context, index) {
-          final product = demoProduct[index];
-
-          if (!product.isFavorite) {
-            return null;
-          }
-
-          return ProductCard(
-            title: demoProduct[index].title,
-            image: demoProduct[index].image,
-            price: demoProduct[index].price,
-            press: () {
-              context.pushNamed(
-                AppRoute.productDetails,
-                extra: demoProduct[index],
-              );
-            },
-          );
+          return const Center();
         },
       ),
     );
