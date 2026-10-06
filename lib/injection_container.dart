@@ -14,7 +14,7 @@ import 'package:mt/features/home/domain/repositories/cart_item_repository.dart';
 import 'package:mt/features/home/domain/repositories/category_repository.dart';
 import 'package:mt/features/home/domain/repositories/product_card_repository.dart';
 import 'package:mt/features/home/domain/repositories/product_details_repository.dart';
-import 'package:mt/features/home/domain/usecases/add_cart_item.dart';
+import 'package:mt/features/home/domain/usecases/adjust_cart_item_quantity.dart';
 import 'package:mt/features/home/domain/usecases/get_cart_item_details.dart';
 import 'package:mt/features/home/domain/usecases/get_categories.dart';
 import 'package:mt/features/home/domain/usecases/get_product_card_details.dart';
@@ -85,8 +85,8 @@ void setupLocator() async {
   sl.registerLazySingleton<GetProductDetails>(
     () => GetProductDetails(sl<ProductDetailsRepository>()),
   );
-  sl.registerLazySingleton<AddCartItem>(
-    () => AddCartItem(sl<CartItemRepository>()),
+  sl.registerLazySingleton<AdjustCartItemQuantity>(
+    () => AdjustCartItemQuantity(sl<CartItemRepository>()),
   );
   sl.registerLazySingleton<GetCartItemDetails>(
     () => GetCartItemDetails(sl<CartItemRepository>()),
