@@ -1,8 +1,8 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mt/core/router/tab_refresher.dart';
 
 class BottomNav extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -28,6 +28,15 @@ class _BottomNavState extends State<BottomNav> {
   }
 
   void _onItemTapped(int index) {
+    switch (index) {
+      case 0:
+        homeTabRefresher.notifyHomeTabSelected();
+        break;
+      case 1:
+        cartTabRefresher.notifyCartTabSelected();
+        break;
+    }
+
     widget.navigationShell.goBranch(
       index,
       initialLocation: index == widget.navigationShell.currentIndex,
