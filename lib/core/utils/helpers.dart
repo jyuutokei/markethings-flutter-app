@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mt/injection_container.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -34,6 +35,7 @@ class AppHelpers {
           elevation: 0,
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.transparent,
+          persist: false,
           content: AwesomeSnackbarContent(
             title: title,
             message: message,
@@ -56,6 +58,7 @@ class AppHelpers {
           elevation: 0,
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.transparent,
+          persist: false,
           content: AwesomeSnackbarContent(
             title: title,
             message: message,
@@ -75,5 +78,34 @@ class AppHelpers {
 
   static TalkerLogger logger() {
     return sl<TalkerLogger>();
+  }
+
+  static Future<bool> showCenterModal(
+    BuildContext context,
+    String title,
+    String desc,
+  ) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: true,
+          builder: (context) => AlertDialog(
+            title: Text(title),
+            content: Text(desc),
+            actions: [
+              TextButton(
+                onPressed: () => context.pop(false),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: AppHelpers.errorColor(context)),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => context.pop(true),
+                child: const Text('Confirm'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 }
