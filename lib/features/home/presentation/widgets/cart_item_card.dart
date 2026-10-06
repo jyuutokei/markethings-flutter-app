@@ -1,13 +1,28 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:mt/core/constants/constants.dart';
+import 'package:mt/core/router/tab_refresher.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/cart_item_details_entity.dart';
+import 'package:mt/injection_container.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CartItemCard extends StatefulWidget {
   final CartItemDetailsEntity cartItem;
+  final int quantity;
+  final bool isUpdating;
+  final VoidCallback onIncrease;
+  final VoidCallback onDecrease;
 
-  const CartItemCard({super.key, required this.cartItem});
+  const CartItemCard({
+    super.key,
+    required this.cartItem,
+    required this.quantity,
+    required this.isUpdating,
+    required this.onIncrease,
+    required this.onDecrease,
+  });
 
   @override
   State<CartItemCard> createState() => _CartItemCardState();
@@ -15,13 +30,46 @@ class CartItemCard extends StatefulWidget {
 
 class _CartItemCardState extends State<CartItemCard> {
   CartItemDetailsEntity get cartItem => widget.cartItem;
+  final SupabaseClient _client = sl<SupabaseClient>();
+
+  Future<void> deleteCartItem(int id) async {
+    await _client.from('cart_items').delete().eq('id', id);
+
+    if (mounted) {
+      cartTabRefresher.notifyCartTabSelected();
+
+      AppHelpers.showSnackBar(
+        context,
+        'Cart item deleted',
+        'Deleted a cart item successfully',
+        ContentType.success,
+      );
+    }
+  }
+
+  Future<bool> _confirmDelete() {
+    return AppHelpers.showCenterModal(
+      context,
+      'Do you want to remove this item?',
+      '${cartItem.productTitle}\nVariant: ${cartItem.variantName}',
+    );
+  }
+
+  Future<void> _confirmAndDelete() async {
+    if (await _confirmDelete()) {
+      await deleteCartItem(cartItem.cartItemId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Dismissible(
       key: Key(cartItem.productTitle),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_) {},
+      direction: widget.isUpdating
+          ? DismissDirection.none
+          : DismissDirection.endToStart,
+      confirmDismiss: (_) => _confirmDelete(),
+      onDismissed: (_) => deleteCartItem(cartItem.cartItemId),
       background: Container(
         color: AppHelpers.errorColor(context),
         alignment: Alignment.centerRight,
@@ -62,12 +110,14 @@ class _CartItemCardState extends State<CartItemCard> {
               Text(
                 cartItem.variantName,
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
               const Gap(defaultPadding / 16),
             ],
           ),
           subtitle: Text(
-            AppHelpers.pesoFormatter(cartItem.price),
+            AppHelpers.pesoFormatter(cartItem.price * widget.quantity),
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: AppHelpers.primaryColor(context),
@@ -76,28 +126,28 @@ class _CartItemCardState extends State<CartItemCard> {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              cartItem.quantity == 1
-                  ? IconButton(
-                      icon: Icon(
-                        Icons.delete,
-                        color: AppHelpers.primaryColor(context),
-                      ),
-                      onPressed: () {},
-                    )
-                  : IconButton(
-                      icon: Icon(
-                        Icons.remove,
-                        color: AppHelpers.primaryColor(context),
-                      ),
-                      onPressed: () {},
-                    ),
-              Text(
-                "${cartItem.quantity}",
-                style: const TextStyle(fontSize: 16),
-              ),
               IconButton(
-                icon: Icon(Icons.add, color: AppHelpers.primaryColor(context)),
-                onPressed: () {},
+                icon: Icon(
+                  widget.quantity == 1 ? Icons.delete : Icons.remove,
+                  color: widget.isUpdating
+                      ? Colors.grey
+                      : AppHelpers.primaryColor(context),
+                ),
+                onPressed: widget.isUpdating
+                    ? null
+                    : widget.quantity == 1
+                    ? _confirmAndDelete
+                    : widget.onDecrease,
+              ),
+              Text("${widget.quantity}", style: const TextStyle(fontSize: 16)),
+              IconButton(
+                icon: Icon(
+                  Icons.add,
+                  color: widget.isUpdating
+                      ? Colors.grey
+                      : AppHelpers.primaryColor(context),
+                ),
+                onPressed: widget.isUpdating ? null : widget.onIncrease,
               ),
             ],
           ),
