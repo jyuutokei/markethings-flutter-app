@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:gap/gap.dart';
 import 'package:mt/core/constants/constants.dart';
 
 class HeaderAppbar extends StatelessWidget implements PreferredSizeWidget {
@@ -28,7 +29,7 @@ class HeaderAppbar extends StatelessWidget implements PreferredSizeWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SvgPicture.asset("assets/icons/Location.svg"),
-          const SizedBox(width: defaultPadding / 2),
+          const Gap(defaultPadding / 2),
           Text(title),
         ],
       ),
