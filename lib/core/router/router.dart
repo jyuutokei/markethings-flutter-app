@@ -9,10 +9,13 @@ import 'package:mt/features/auth/presentation/pages/confirm_email_otp.dart';
 import 'package:mt/features/auth/presentation/pages/reset_password_otp.dart';
 import 'package:mt/features/error/presentation/error404.dart';
 import 'package:mt/features/auth/presentation/pages/login.dart';
+import 'package:mt/features/home/domain/entities/cart_item_details_entity.dart';
 import 'package:mt/features/home/presentation/pages/cart.dart';
+import 'package:mt/features/home/presentation/pages/checkout.dart';
 import 'package:mt/features/home/presentation/pages/details.dart';
 import 'package:mt/features/home/presentation/pages/favorites.dart';
 import 'package:mt/features/home/presentation/pages/home.dart';
+import 'package:mt/features/home/presentation/pages/order_confirmation.dart';
 import 'package:mt/features/home/presentation/pages/profile.dart';
 import 'package:mt/features/home/presentation/widgets/search_form.dart';
 import 'package:mt/injection_container.dart';
@@ -110,6 +113,45 @@ final goRouter = GoRouter(
           );
         },
       ),
+    ),
+    GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
+      path: '/checkout',
+      name: AppRoute.checkout,
+      pageBuilder: (context, state) {
+        final selectedCartItems = state.extra as List<CartItemDetailsEntity>;
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: Checkout(cartItems: selectedCartItems),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SharedAxisTransition(
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              transitionType: SharedAxisTransitionType.scaled,
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
+      path: '/order_confirm',
+      name: AppRoute.orderConfirm,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: const OrderConfirmation(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SharedAxisTransition(
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              transitionType: SharedAxisTransitionType.scaled,
+              child: child,
+            );
+          },
+        );
+      },
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
