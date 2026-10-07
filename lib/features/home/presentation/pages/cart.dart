@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mt/core/constants/constants.dart';
+import 'package:mt/core/router/routes.dart';
 import 'package:mt/core/router/tab_refresher.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/cart_item_details_entity.dart';
@@ -32,6 +34,7 @@ class _CartState extends State<Cart> {
   final Map<int, int> _pendingDeltas = {};
   final Map<int, Debouncer> _itemDebouncers = {};
   final Set<int> _updatingItemIds = {};
+  final Set<int> _selectedCartItemIds = {};
 
   int _quantityFor(CartItemDetailsEntity item) =>
       _quantities[item.cartItemId] ?? item.quantity;
@@ -92,6 +95,14 @@ class _CartState extends State<Cart> {
     );
   }
 
+  void _toggleSelection(CartItemDetailsEntity item) {
+    setState(() {
+      if (!_selectedCartItemIds.add(item.cartItemId)) {
+        _selectedCartItemIds.remove(item.cartItemId);
+      }
+    });
+  }
+
   Future<void> _saveQuantityChange(CartItemDetailsEntity item) async {
     final id = item.cartItemId;
     final delta = _pendingDeltas.remove(id) ?? 0;
@@ -130,7 +141,7 @@ class _CartState extends State<Cart> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: SidebarNav(controller: _sbxController),
-      appBar: HeaderAppbar(scaffoldKey: _scaffoldKey, title: 'Cart'),
+      appBar: HeaderAppbar(scaffoldKey: _scaffoldKey, title: 'Shopping cart'),
       body: FutureBuilder<List<CartItemDetailsEntity>>(
         future: _cartItemsFuture,
         builder: (context, snapshot) {
@@ -143,13 +154,21 @@ class _CartState extends State<Cart> {
           }
 
           final cartItems = snapshot.data ?? [];
-          final total = cartItems.fold<double>(
+          final selectedItems = cartItems
+              .where((item) => _selectedCartItemIds.contains(item.cartItemId))
+              .toList();
+          final total = selectedItems.fold<double>(
             0,
             (sum, item) => sum + item.price * _quantityFor(item),
           );
 
           return Column(
             children: [
+              const Gap(defaultPadding / 2),
+              const Text(
+                "Select the item you want to checkout.",
+                textAlign: TextAlign.start,
+              ),
               const Gap(defaultPadding / 2),
               Expanded(
                 child: cartItems.isEmpty
@@ -165,6 +184,10 @@ class _CartState extends State<Cart> {
                             cartItem: item,
                             quantity: quantity,
                             isUpdating: _updatingItemIds.contains(id),
+                            isSelected: _selectedCartItemIds.contains(
+                              item.cartItemId,
+                            ),
+                            onTap: () => _toggleSelection(item),
                             onIncrease: () => _changeQuantity(item, 1),
                             onDecrease: () => _changeQuantity(item, -1),
                           );
@@ -192,7 +215,14 @@ class _CartState extends State<Cart> {
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton(
-                        onPressed: cartItems.isEmpty ? null : () {},
+                        onPressed: selectedItems.isEmpty
+                            ? null
+                            : () {
+                                context.pushNamed(
+                                  AppRoute.checkout,
+                                  extra: selectedItems,
+                                );
+                              },
                         child: const Text('Checkout'),
                       ),
                     ),
