@@ -5,11 +5,12 @@ abstract class AppRoute {
   static const profile = 'profile';
   static const productDetails = 'product_details';
   static const search = 'search';
+  static const checkout = 'checkout';
+  static const orderConfirm = 'order_confirm';
 
   static const login = 'login';
   static const confirmEmailOtp = 'confirm_email_otp';
   static const resetPwdOtp = 'reset_pwd_otp';
-  static const bridge = 'bridge';
 }
 
 abstract class AppRouteGuard {
@@ -21,5 +22,7 @@ abstract class AppRouteGuard {
     '/profile',
     '/product_details',
     '/search',
+    '/checkout',
+    '/order_confirm',
   };
 }
