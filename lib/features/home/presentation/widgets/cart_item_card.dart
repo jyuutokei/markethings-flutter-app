@@ -12,6 +12,8 @@ class CartItemCard extends StatefulWidget {
   final CartItemDetailsEntity cartItem;
   final int quantity;
   final bool isUpdating;
+  final bool isSelected;
+  final VoidCallback onTap;
   final VoidCallback onIncrease;
   final VoidCallback onDecrease;
 
@@ -20,6 +22,8 @@ class CartItemCard extends StatefulWidget {
     required this.cartItem,
     required this.quantity,
     required this.isUpdating,
+    required this.isSelected,
+    required this.onTap,
     required this.onIncrease,
     required this.onDecrease,
   });
@@ -77,12 +81,15 @@ class _CartItemCardState extends State<CartItemCard> {
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       child: Card(
-        color: Colors.white,
+        color: widget.isSelected
+            ? AppHelpers.primaryColor(context)
+            : Colors.white,
         margin: const EdgeInsets.symmetric(
           horizontal: defaultPadding,
           vertical: 4,
         ),
         child: ListTile(
+          onTap: widget.onTap,
           leading: Container(
             decoration: const BoxDecoration(
               color: Colors.white,
@@ -100,16 +107,25 @@ class _CartItemCardState extends State<CartItemCard> {
             children: [
               Text(
                 cartItem.productTitle,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: widget.isSelected ? Colors.white : Colors.black,
+                ),
               ),
               const Gap(defaultPadding / 16),
-              const Text(
+              Text(
                 'Variant:',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: widget.isSelected ? Colors.white : Colors.grey,
+                ),
               ),
               Text(
                 cartItem.variantName,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: widget.isSelected ? Colors.white : Colors.grey,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -120,7 +136,9 @@ class _CartItemCardState extends State<CartItemCard> {
             AppHelpers.pesoFormatter(cartItem.price * widget.quantity),
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppHelpers.primaryColor(context),
+              color: widget.isSelected
+                  ? Colors.white
+                  : AppHelpers.primaryColor(context),
             ),
           ),
           trailing: Row(
@@ -131,6 +149,8 @@ class _CartItemCardState extends State<CartItemCard> {
                   widget.quantity == 1 ? Icons.delete : Icons.remove,
                   color: widget.isUpdating
                       ? Colors.grey
+                      : widget.isSelected
+                      ? Colors.white
                       : AppHelpers.primaryColor(context),
                 ),
                 onPressed: widget.isUpdating
@@ -139,12 +159,20 @@ class _CartItemCardState extends State<CartItemCard> {
                     ? _confirmAndDelete
                     : widget.onDecrease,
               ),
-              Text("${widget.quantity}", style: const TextStyle(fontSize: 16)),
+              Text(
+                "${widget.quantity}",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: widget.isSelected ? Colors.white : Colors.black,
+                ),
+              ),
               IconButton(
                 icon: Icon(
                   Icons.add,
                   color: widget.isUpdating
                       ? Colors.grey
+                      : widget.isSelected
+                      ? Colors.white
                       : AppHelpers.primaryColor(context),
                 ),
                 onPressed: widget.isUpdating ? null : widget.onIncrease,
