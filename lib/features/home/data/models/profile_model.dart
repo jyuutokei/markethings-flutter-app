@@ -6,8 +6,6 @@ class ProfileModel extends ProfileEntity {
     required super.displayName,
     super.storeName,
     super.avatarUrl,
-    required super.createdAt,
-    required super.updatedAt,
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
@@ -16,17 +14,6 @@ class ProfileModel extends ProfileEntity {
       displayName: json['display_name'] as String,
       storeName: json['store_name'] as String?,
       avatarUrl: json['avatar_url'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'display_name': displayName,
-      'store_name': storeName,
-      'avatar_url': avatarUrl,
-    };
   }
 }
