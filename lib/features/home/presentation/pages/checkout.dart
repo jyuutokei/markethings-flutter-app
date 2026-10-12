@@ -6,8 +6,8 @@ import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/router/routes.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/cart_item_details_entity.dart';
+import 'package:mt/features/home/domain/usecases/place_order.dart';
 import 'package:mt/injection_container.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Checkout extends StatefulWidget {
   final List<CartItemDetailsEntity> cartItems;
@@ -22,19 +22,21 @@ class _CheckoutState extends State<Checkout> {
   List<CartItemDetailsEntity> get _cartItems => widget.cartItems;
   var _step = 0;
 
-  Future<void> deleteMultipleRows(List<CartItemDetailsEntity> items) async {
+  Future<void> insertOrder() async {
     try {
-      final List<int> cartItemIds = items
-          .map((item) => item.cartItemId)
-          .toList();
+      final order = await sl<PlaceOrder>().call(
+        cartItemIds: _cartItems.map((item) => item.cartItemId).toList(),
+      );
 
-      await sl<SupabaseClient>()
-          .from('cart_items')
-          .delete()
-          .inFilter('id', cartItemIds);
+      if (!mounted) return;
+      context.pushReplacementNamed(AppRoute.orderConfirm, extra: order.orderId);
     } catch (error) {
       AppHelpers.logger().error(error);
     }
+  }
+
+  num totalCartItems() {
+    return _cartItems.fold(0, (sum, item) => sum + item.price * item.quantity);
   }
 
   @override
@@ -61,15 +63,11 @@ class _CheckoutState extends State<Checkout> {
         currentStep: _step,
         onStepContinue: () async {
           if (_step == 2) {
-            await deleteMultipleRows(_cartItems);
-
-            if (mounted) {
-              context.pushReplacementNamed(AppRoute.orderConfirm);
-            }
+            await insertOrder();
             return;
           }
 
-          return setState(() => _step = (_step + 1).clamp(0, 2));
+          setState(() => _step = (_step + 1).clamp(0, 2));
         },
         onStepCancel: () => setState(() => _step = (_step - 1).clamp(0, 2)),
         steps: [
@@ -106,7 +104,7 @@ class _CheckoutState extends State<Checkout> {
           Step(
             title: const Text('Summary'),
             content: Text(
-              'Order total: ${AppHelpers.pesoFormatter(_cartItems.fold(0, (sum, item) => sum + item.price * item.quantity))}',
+              'Order total: ${AppHelpers.pesoFormatter(totalCartItems())}',
             ),
           ),
         ],
