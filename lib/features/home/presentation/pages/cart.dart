@@ -218,9 +218,22 @@ class _CartState extends State<Cart> {
                         onPressed: selectedItems.isEmpty
                             ? null
                             : () {
+                                final checkoutItems = selectedItems
+                                    .map(
+                                      (item) => CartItemDetailsEntity(
+                                        cartItemId: item.cartItemId,
+                                        variantId: item.variantId,
+                                        productTitle: item.productTitle,
+                                        variantName: item.variantName,
+                                        price: item.price,
+                                        quantity: _quantityFor(item),
+                                      ),
+                                    )
+                                    .toList();
+
                                 context.pushNamed(
                                   AppRoute.checkout,
-                                  extra: selectedItems,
+                                  extra: checkoutItems,
                                 );
                               },
                         child: const Text('Checkout'),
