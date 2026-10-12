@@ -33,6 +33,7 @@ dependencies:
   awesome_snackbar_content: ^0.1.8
   animations: ^3.0.0
   flutter_debouncer: ^2.1.1
+  cached_network_image_ce: ^4.13.1
 
 dev_dependencies:
   flutter_test:
