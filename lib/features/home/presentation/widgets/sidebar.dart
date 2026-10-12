@@ -1,7 +1,11 @@
+import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gap/gap.dart';
 import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/utils/helpers.dart';
+import 'package:mt/features/home/domain/entities/profile_entity.dart';
+import 'package:mt/features/home/domain/usecases/get_user_profile.dart';
 import 'package:mt/injection_container.dart';
 import 'package:sidebarx/sidebarx.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -17,6 +21,32 @@ class SidebarNav extends StatefulWidget {
 
 class _SidebarNavState extends State<SidebarNav> {
   final user = sl<SupabaseClient>().auth.currentUser;
+  late ProfileEntity _profile;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final profile = await sl<GetUserProfile>().call(user!.id);
+
+      if (!mounted) return;
+      setState(() {
+        _profile = profile;
+        _isLoading = false;
+      });
+    } catch (error) {
+      AppHelpers.logger().error(error);
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,18 +92,41 @@ class _SidebarNavState extends State<SidebarNav> {
           child: SizedBox(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Image.asset('assets/images/sample/avatar.png'),
-                  const Gap(defaultPadding),
-                  Text(
-                    user?.email ?? "",
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                  const Gap(defaultPadding),
-                  const Divider(),
-                ],
-              ),
+              child: _isLoading
+                  ? const SpinKitRing(color: Colors.white)
+                  : Column(
+                      children: [
+                        CachedNetworkImage(
+                          imageUrl:
+                              _profile.avatarUrl ??
+                              'https://static.wikia.nocookie.net/zenless-zone-zero/images/5/53/Avatar_Default_Anonymous.png/revision/latest?cb=20240725210433',
+                          imageBuilder: (context, imageProvider) => Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                fit: BoxFit.cover,
+                                image: imageProvider,
+                              ),
+                            ),
+                          ),
+                          placeholder: (context, url) =>
+                              const SpinKitRing(color: Colors.white),
+                          errorBuilder: (context, url, error) =>
+                              const Icon(Icons.error),
+                        ),
+
+                        const Gap(defaultPadding),
+                        Text(
+                          _profile.displayName,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        const Gap(defaultPadding),
+                        const Divider(),
+                      ],
+                    ),
             ),
           ),
         );
