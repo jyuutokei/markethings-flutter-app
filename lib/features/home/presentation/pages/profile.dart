@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mt/core/constants/constants.dart';
+import 'package:mt/core/router/routes.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/profile_entity.dart';
 import 'package:mt/features/home/domain/usecases/get_user_profile.dart';
-import 'package:mt/features/home/presentation/widgets/header_appbar.dart';
+import 'package:mt/features/home/presentation/widgets/appbar_main.dart';
 import 'package:mt/features/home/presentation/widgets/profile_header.dart';
 import 'package:mt/features/home/presentation/widgets/sidebar.dart';
 import 'package:mt/injection_container.dart';
@@ -56,7 +58,7 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: SidebarNav(controller: _sbxController),
-      appBar: HeaderAppbar(scaffoldKey: _scaffoldKey, title: "Profile"),
+      appBar: AppBarMain(scaffoldKey: _scaffoldKey, title: "Profile"),
       body: _isLoading
           ? const Center(child: SpinKitPumpingHeart(color: Colors.white))
           : Column(
@@ -84,7 +86,9 @@ class _ProfileState extends State<Profile> {
                           ),
                           title: const Text("My Orders"),
                           trailing: const Icon(Icons.chevron_right),
-                          onTap: () {},
+                          onTap: () {
+                            context.pushNamed(AppRoute.orders);
+                          },
                         ),
                       ],
                     ),
