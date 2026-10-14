@@ -108,4 +108,8 @@ class AppHelpers {
         ) ??
         false;
   }
+
+  static String formattedDatetime(DateTime timestamp) {
+    return DateFormat('MM/dd/yyyy hh:mm a').format(timestamp);
+  }
 }
