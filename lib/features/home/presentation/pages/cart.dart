@@ -12,7 +12,7 @@ import 'package:mt/features/home/domain/entities/cart_item_details_entity.dart';
 import 'package:mt/features/home/domain/usecases/adjust_cart_item_quantity.dart';
 import 'package:mt/features/home/domain/usecases/get_cart_item_details.dart';
 import 'package:mt/features/home/presentation/widgets/cart_item_card.dart';
-import 'package:mt/features/home/presentation/widgets/header_appbar.dart';
+import 'package:mt/features/home/presentation/widgets/appbar_main.dart';
 import 'package:mt/features/home/presentation/widgets/sidebar.dart';
 import 'package:mt/injection_container.dart';
 import 'package:sidebarx/sidebarx.dart';
@@ -141,7 +141,7 @@ class _CartState extends State<Cart> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: SidebarNav(controller: _sbxController),
-      appBar: HeaderAppbar(scaffoldKey: _scaffoldKey, title: 'Shopping cart'),
+      appBar: AppBarMain(scaffoldKey: _scaffoldKey, title: 'Shopping cart'),
       body: FutureBuilder<List<CartItemDetailsEntity>>(
         future: _cartItemsFuture,
         builder: (context, snapshot) {
