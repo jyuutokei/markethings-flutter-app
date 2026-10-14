@@ -2,7 +2,9 @@ import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mt/core/constants/constants.dart';
+import 'package:mt/core/router/routes.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/profile_entity.dart';
 import 'package:mt/features/home/domain/usecases/get_user_profile.dart';
@@ -132,6 +134,13 @@ class _SidebarNavState extends State<SidebarNav> {
         );
       },
       items: [
+        SidebarXItem(
+          icon: Icons.shopping_bag,
+          label: 'My Orders',
+          onTap: () {
+            context.pushNamed(AppRoute.orders);
+          },
+        ),
         SidebarXItem(
           icon: Icons.logout,
           label: 'Sign out',
