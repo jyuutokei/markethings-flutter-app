@@ -21,8 +21,10 @@ import 'package:mt/features/home/domain/repositories/product_card_repository.dar
 import 'package:mt/features/home/domain/repositories/product_details_repository.dart';
 import 'package:mt/features/home/domain/repositories/profile_repository.dart';
 import 'package:mt/features/home/domain/usecases/adjust_cart_item_quantity.dart';
+import 'package:mt/features/home/domain/usecases/cancel_order.dart';
 import 'package:mt/features/home/domain/usecases/get_cart_item_details.dart';
 import 'package:mt/features/home/domain/usecases/get_categories.dart';
+import 'package:mt/features/home/domain/usecases/get_order_details.dart';
 import 'package:mt/features/home/domain/usecases/get_product_card_details.dart';
 import 'package:mt/features/home/domain/usecases/get_product_details.dart';
 import 'package:mt/features/home/domain/usecases/get_user_profile.dart';
@@ -115,4 +117,10 @@ void setupLocator() async {
     () => GetUserProfile(sl<ProfileRepository>()),
   );
   sl.registerLazySingleton<PlaceOrder>(() => PlaceOrder(sl<OrderRepository>()));
+  sl.registerLazySingleton<GetOrderDetails>(
+    () => GetOrderDetails(sl<OrderRepository>()),
+  );
+  sl.registerLazySingleton<CancelOrder>(
+    () => CancelOrder(sl<OrderRepository>()),
+  );
 }
