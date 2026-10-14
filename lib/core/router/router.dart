@@ -16,6 +16,7 @@ import 'package:mt/features/home/presentation/pages/details.dart';
 import 'package:mt/features/home/presentation/pages/favorites.dart';
 import 'package:mt/features/home/presentation/pages/home.dart';
 import 'package:mt/features/home/presentation/pages/order_confirmation.dart';
+import 'package:mt/features/home/presentation/pages/orders.dart';
 import 'package:mt/features/home/presentation/pages/profile.dart';
 import 'package:mt/features/home/presentation/widgets/search_form.dart';
 import 'package:mt/injection_container.dart';
@@ -150,6 +151,19 @@ final goRouter = GoRouter(
               child: child,
             );
           },
+        );
+      },
+    ),
+    GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
+      path: '/orders',
+      name: AppRoute.orders,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: const Orders(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(opacity: animation, child: child),
         );
       },
     ),
