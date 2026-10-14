@@ -125,6 +125,7 @@ class _DetailsState extends State<Details> {
               color: Colors.black,
               onPressed: () {
                 homeTabRefresher.notifyHomeTabSelected();
+                context.pop();
               },
             ),
             actions: [
