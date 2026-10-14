@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mt/core/constants/constants.dart';
-import 'package:mt/features/home/presentation/widgets/header_appbar.dart';
+import 'package:mt/features/home/presentation/widgets/appbar_main.dart';
 import 'package:mt/features/home/presentation/widgets/sidebar.dart';
 import 'package:sidebarx/sidebarx.dart';
 
@@ -20,7 +20,7 @@ class _FavoritesState extends State<Favorites> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: SidebarNav(controller: _sbxController),
-      appBar: HeaderAppbar(scaffoldKey: _scaffoldKey, title: "Favorites"),
+      appBar: AppBarMain(scaffoldKey: _scaffoldKey, title: "Favorites"),
       body: GridView.builder(
         padding: const EdgeInsets.all(defaultPadding),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
