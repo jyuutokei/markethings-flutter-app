@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mt/core/constants/constants.dart';
 import 'package:mt/features/home/presentation/widgets/categories.dart';
-import 'package:mt/features/home/presentation/widgets/header_appbar.dart';
+import 'package:mt/features/home/presentation/widgets/appbar_main.dart';
 import 'package:mt/features/home/presentation/widgets/new_arrival_products.dart';
 import 'package:mt/features/home/presentation/widgets/search_form_fake.dart';
 import 'package:mt/features/home/presentation/widgets/sidebar.dart';
@@ -23,7 +23,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: SidebarNav(controller: _sbxController),
-      appBar: HeaderAppbar(
+      appBar: AppBarMain(
         scaffoldKey: _scaffoldKey,
         title: "Everything is a placeholder",
       ),
