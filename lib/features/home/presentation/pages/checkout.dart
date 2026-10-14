@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/router/routes.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/cart_item_details_entity.dart';
 import 'package:mt/features/home/domain/usecases/place_order.dart';
+import 'package:mt/features/home/presentation/widgets/appbar_sub.dart';
 import 'package:mt/injection_container.dart';
 
 class Checkout extends StatefulWidget {
@@ -42,23 +40,7 @@ class _CheckoutState extends State<Checkout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: BackButton(
-          color: Colors.black,
-          onPressed: () {
-            context.pop();
-          },
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset("assets/icons/Location.svg"),
-            const Gap(defaultPadding / 2),
-            const Text("Checkout"),
-            const Gap(defaultPadding * 2),
-          ],
-        ),
-      ),
+      appBar: const AppBarSub(title: 'Checkout'),
       body: Stepper(
         currentStep: _step,
         onStepContinue: () async {
