@@ -7,25 +7,30 @@ import 'package:mt/features/home/data/datasources/category_remote_data_source.da
 import 'package:mt/features/home/data/datasources/order_remote_data_source.dart';
 import 'package:mt/features/home/data/datasources/product_card_remote_data_source.dart';
 import 'package:mt/features/home/data/datasources/product_details_remote_data_source.dart';
+import 'package:mt/features/home/data/datasources/product_title_remote_data_source.dart';
 import 'package:mt/features/home/data/datasources/profile_remote_data_source.dart';
 import 'package:mt/features/home/data/repositories/cart_item_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/category_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/order_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/product_card_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/product_details_repository_impl.dart';
+import 'package:mt/features/home/data/repositories/product_title_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/profile_repository_impl.dart';
 import 'package:mt/features/home/domain/repositories/cart_item_repository.dart';
 import 'package:mt/features/home/domain/repositories/category_repository.dart';
 import 'package:mt/features/home/domain/repositories/order_repository.dart';
 import 'package:mt/features/home/domain/repositories/product_card_repository.dart';
 import 'package:mt/features/home/domain/repositories/product_details_repository.dart';
+import 'package:mt/features/home/domain/repositories/product_title_repository.dart';
 import 'package:mt/features/home/domain/repositories/profile_repository.dart';
 import 'package:mt/features/home/domain/usecases/adjust_cart_item_quantity.dart';
 import 'package:mt/features/home/domain/usecases/cancel_order.dart';
+import 'package:mt/features/home/domain/usecases/get_all_product_titles.dart';
 import 'package:mt/features/home/domain/usecases/get_cart_item_details.dart';
 import 'package:mt/features/home/domain/usecases/get_categories.dart';
 import 'package:mt/features/home/domain/usecases/get_order_details.dart';
 import 'package:mt/features/home/domain/usecases/get_product_card_details.dart';
+import 'package:mt/features/home/domain/usecases/get_product_card_page.dart';
 import 'package:mt/features/home/domain/usecases/get_product_details.dart';
 import 'package:mt/features/home/domain/usecases/get_user_profile.dart';
 import 'package:mt/features/home/domain/usecases/place_order.dart';
@@ -76,6 +81,9 @@ void setupLocator() async {
   sl.registerLazySingleton<OrderRemoteDataSource>(
     () => OrderRemoteDataSourceImpl(sl<SupabaseClient>()),
   );
+  sl.registerLazySingleton<ProductTitleRemoteDataSource>(
+    () => ProductTitleRemoteDataSourceImpl(sl<SupabaseClient>()),
+  );
 
   // repositories
   sl.registerLazySingleton<ProductCardRepository>(
@@ -96,10 +104,16 @@ void setupLocator() async {
   sl.registerLazySingleton<OrderRepository>(
     () => OrderRepositoryImpl(sl<OrderRemoteDataSource>()),
   );
+  sl.registerLazySingleton<ProductTitleRepository>(
+    () => ProductTitleRepositoryImpl(sl<ProductTitleRemoteDataSource>()),
+  );
 
   // usecases
   sl.registerLazySingleton<GetProductCardDetails>(
     () => GetProductCardDetails(sl<ProductCardRepository>()),
+  );
+  sl.registerLazySingleton<GetProductCardPage>(
+    () => GetProductCardPage(sl<ProductCardRepository>()),
   );
   sl.registerLazySingleton<GetCategories>(
     () => GetCategories(sl<CategoryRepository>()),
@@ -122,5 +136,8 @@ void setupLocator() async {
   );
   sl.registerLazySingleton<CancelOrder>(
     () => CancelOrder(sl<OrderRepository>()),
+  );
+  sl.registerLazySingleton<GetProductTitles>(
+    () => GetProductTitles(sl<ProductTitleRepository>()),
   );
 }
