@@ -8,7 +8,6 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:mt/features/home/domain/usecases/cancel_order.dart';
 import 'package:mt/features/home/presentation/widgets/order_items_card.dart';
 import 'package:mt/injection_container.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OrderCard extends StatefulWidget {
   final OrderCardEntity _orderItem;
@@ -122,25 +121,25 @@ class _OrderCardState extends State<OrderCard> {
             ...orderItem.items.map(
               (item) => OrderItemsCard(orderLineItem: item),
             ),
-            Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(color: Colors.white),
-              child: Padding(
-                padding: const EdgeInsets.all(defaultPadding / 2),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (_status.toLowerCase() == 'processing')
+            if (_status.toLowerCase() == 'processing')
+              Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(color: Colors.white),
+                child: Padding(
+                  padding: const EdgeInsets.all(defaultPadding / 2),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
                       FilledButton(
                         onPressed: _isCancelling ? null : _cancelOrder,
                         child: Text(
                           _isCancelling ? 'Cancelling...' : 'Cancel Order',
                         ),
                       ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
