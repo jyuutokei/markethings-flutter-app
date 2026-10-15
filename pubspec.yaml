@@ -34,6 +34,8 @@ dependencies:
   animations: ^3.0.0
   flutter_debouncer: ^2.1.1
   cached_network_image_ce: ^4.13.1
+  infinite_scroll_pagination: ^5.1.1
+  fuzzy_bolt: ^2.0.2
 
 dev_dependencies:
   flutter_test:
