@@ -11,4 +11,12 @@ class ProductCardRepositoryImpl implements ProductCardRepository {
   Future<List<ProductCardEntity>> getProductCardDetails([int? limit]) {
     return remoteDataSource.getProductCardDetails(limit);
   }
+
+  @override
+  Future<List<ProductCardEntity>> getProductCardPage({
+    int limit = 10,
+    int offset = 0,
+  }) {
+    return remoteDataSource.getProductCardPage(limit: limit, offset: offset);
+  }
 }
