@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:fuzzy_bolt/fuzzy_bolt.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mt/core/constants/constants.dart';
+import 'package:mt/core/utils/helpers.dart';
+import 'package:mt/features/home/domain/entities/product_title_entity.dart';
+import 'package:mt/features/home/domain/usecases/get_all_product_titles.dart';
 import 'package:mt/injection_container.dart';
 
 const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
@@ -21,7 +24,17 @@ class _SearchFormState extends State<SearchForm> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   final _debouncer = sl<Debouncer>();
-  List<String> _results = [];
+  late List<ProductTitleEntity> _titles = [];
+  bool _isLoading = true;
+  List<ProductTitleEntity> _textMatches = [];
+  List<FuzzyResult<ProductTitleEntity>> _fuzzyMatches = [];
+  int _searchRequest = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProductTitles();
+  }
 
   @override
   void dispose() {
@@ -31,53 +44,59 @@ class _SearchFormState extends State<SearchForm> {
     super.dispose();
   }
 
+  Future<void> _loadProductTitles() async {
+    try {
+      final titles = await sl<GetProductTitles>().call();
+
+      if (!mounted) return;
+      setState(() {
+        _titles = titles;
+        _isLoading = false;
+      });
+    } catch (error) {
+      AppHelpers.logger().error(error);
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   void _onQueryChanged(String query) {
-    const duration = Duration(milliseconds: 300);
+    final normalizedQuery = query.trim().toLowerCase();
+    final request = ++_searchRequest;
+
     _debouncer.debounce(
-      duration: duration,
-      onDebounce: () {
+      duration: const Duration(milliseconds: 300),
+      onDebounce: () async {
+        if (normalizedQuery.isEmpty) {
+          if (!mounted) return;
+          setState(() {
+            _textMatches = [];
+            _fuzzyMatches = [];
+          });
+          return;
+        }
+
+        final textMatches = _titles
+            .where((item) => item.title.toLowerCase().contains(normalizedQuery))
+            .toList();
+
+        final fuzzyMatches = textMatches.isNotEmpty
+            ? <FuzzyResult<ProductTitleEntity>>[]
+            : await FuzzyBolt.searchWithScores<ProductTitleEntity>(
+                _titles,
+                normalizedQuery,
+                selectors: [(item) => item.title.toLowerCase()],
+                maxResults: 8,
+                skipIsolate: kIsWeb,
+              );
+
+        if (!mounted || request != _searchRequest) return;
         setState(() {
-          _results = _search(query);
+          _textMatches = textMatches;
+          _fuzzyMatches = fuzzyMatches;
         });
-      },
-    );
-  }
-
-  List<String> _search(String query) {
-    if (query.isEmpty) return [];
-    return ['Result for "$query" #1', 'Result for "$query" #2'];
-  }
-
-  void _modalBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true, // Adds the Material 3 drag indicator pill
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      enableDrag: true,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          height: 250,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Options', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.share),
-                title: const Text('Wla pakoy'),
-                onTap: () => Navigator.pop(context), // Closes the sheet
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete),
-                title: const Text('Tarong na idea'),
-                onTap: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-        );
       },
     );
   }
@@ -91,41 +110,12 @@ class _SearchFormState extends State<SearchForm> {
           controller: _controller,
           focusNode: _focusNode,
           autofocus: true,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Search products...',
             border: outlineInputBorder,
             enabledBorder: outlineInputBorder,
             focusedBorder: outlineInputBorder,
             errorBorder: outlineInputBorder,
-            suffixIcon: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: defaultPadding / 2,
-                vertical: defaultPadding / 2,
-              ),
-              child: SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _modalBottomSheet(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                    ),
-                  ),
-                  child: SvgPicture.asset(
-                    "assets/icons/Filter.svg",
-                    width: 30,
-                    height: 30,
-                    colorFilter: const ColorFilter.mode(
-                      Colors.white,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ),
           onChanged: _onQueryChanged,
         ),
@@ -144,10 +134,39 @@ class _SearchFormState extends State<SearchForm> {
             ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: _results.length,
-        itemBuilder: (context, index) => ListTile(title: Text(_results[index])),
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Builder(
+              builder: (context) {
+                final textMatchCount = _textMatches.length;
+                final resultCount = textMatchCount + _fuzzyMatches.length;
+
+                return ListView.builder(
+                  itemCount: resultCount,
+                  itemBuilder: (context, index) {
+                    if (index < textMatchCount) {
+                      final item = _textMatches[index];
+
+                      return ListTile(
+                        title: Text(item.title),
+                        onTap: () {
+                          // Handle selected suggestion here.
+                        },
+                      );
+                    }
+
+                    final result = _fuzzyMatches[index - textMatchCount];
+
+                    return ListTile(
+                      title: Text(result.item.title),
+                      onTap: () {
+                        // Handle selected suggestion here.
+                      },
+                    );
+                  },
+                );
+              },
+            ),
     );
   }
 }
