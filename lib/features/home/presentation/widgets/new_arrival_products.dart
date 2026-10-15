@@ -45,7 +45,12 @@ class _NewArrivalProductsState extends State<NewArrivalProducts> {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: defaultPadding),
-          child: SectionTitle(title: "New Arrival", pressSeeAll: () {}),
+          child: SectionTitle(
+            title: "New Arrival",
+            pressSeeAll: () {
+              context.pushNamed(AppRoute.products);
+            },
+          ),
         ),
         FutureBuilder<List<ProductCardEntity>>(
           future: _productsFuture,
