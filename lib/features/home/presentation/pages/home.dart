@@ -23,10 +23,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: SidebarNav(controller: _sbxController),
-      appBar: AppBarMain(
-        scaffoldKey: _scaffoldKey,
-        title: "Everything is a placeholder",
-      ),
+      appBar: AppBarMain(scaffoldKey: _scaffoldKey, title: "Home"),
       body: const SingleChildScrollView(
         physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         padding: EdgeInsets.all(defaultPadding),
