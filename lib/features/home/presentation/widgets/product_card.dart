@@ -50,7 +50,7 @@ class _ProductCardState extends State<ProductCard> {
                     height: 132,
                   ),
                 ),
-                const SizedBox(height: defaultPadding / 2),
+                const Gap(defaultPadding / 2),
                 Expanded(
                   child: Text(
                     widget.title,
