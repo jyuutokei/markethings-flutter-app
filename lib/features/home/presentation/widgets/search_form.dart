@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:fuzzy_bolt/fuzzy_bolt.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mt/core/router/routes.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/product_title_entity.dart';
 import 'package:mt/features/home/domain/usecases/get_all_product_titles.dart';
@@ -14,7 +15,8 @@ const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
 );
 
 class SearchForm extends StatefulWidget {
-  const SearchForm({super.key});
+  final String? searchQuery;
+  const SearchForm({super.key, this.searchQuery});
 
   @override
   State<SearchForm> createState() => _SearchFormState();
@@ -29,10 +31,14 @@ class _SearchFormState extends State<SearchForm> {
   List<ProductTitleEntity> _textMatches = [];
   List<FuzzyResult<ProductTitleEntity>> _fuzzyMatches = [];
   int _searchRequest = 0;
+  static const _maxSuggestions = 12;
 
   @override
   void initState() {
     super.initState();
+    if (widget.searchQuery != null) {
+      _controller.text = widget.searchQuery!;
+    }
     _loadProductTitles();
   }
 
@@ -80,6 +86,7 @@ class _SearchFormState extends State<SearchForm> {
 
         final textMatches = _titles
             .where((item) => item.title.toLowerCase().contains(normalizedQuery))
+            .take(_maxSuggestions)
             .toList();
 
         final fuzzyMatches = textMatches.isNotEmpty
@@ -88,7 +95,7 @@ class _SearchFormState extends State<SearchForm> {
                 _titles,
                 normalizedQuery,
                 selectors: [(item) => item.title.toLowerCase()],
-                maxResults: 8,
+                maxResults: _maxSuggestions,
                 skipIsolate: kIsWeb,
               );
 
@@ -99,6 +106,13 @@ class _SearchFormState extends State<SearchForm> {
         });
       },
     );
+  }
+
+  void _openProductResults(String query) {
+    final normalizedQuery = query.trim();
+    if (normalizedQuery.isEmpty) return;
+
+    context.pushNamed(AppRoute.products, extra: {'query': normalizedQuery});
   }
 
   @override
@@ -118,6 +132,9 @@ class _SearchFormState extends State<SearchForm> {
             errorBorder: outlineInputBorder,
           ),
           onChanged: _onQueryChanged,
+          onSubmitted: (query) {
+            _openProductResults(query);
+          },
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -141,16 +158,29 @@ class _SearchFormState extends State<SearchForm> {
                 final textMatchCount = _textMatches.length;
                 final resultCount = textMatchCount + _fuzzyMatches.length;
 
-                return ListView.builder(
+                return ListView.separated(
                   itemCount: resultCount,
+                  separatorBuilder: (BuildContext context, int index) {
+                    return const Divider(
+                      color: Colors.grey,
+                      thickness: 1,
+                      height: 1,
+                      indent: 10,
+                      endIndent: 10,
+                    );
+                  },
                   itemBuilder: (context, index) {
                     if (index < textMatchCount) {
                       final item = _textMatches[index];
 
                       return ListTile(
+                        trailing: const Icon(
+                          Icons.arrow_right_rounded,
+                          size: 30,
+                        ),
                         title: Text(item.title),
                         onTap: () {
-                          // Handle selected suggestion here.
+                          _openProductResults(item.title);
                         },
                       );
                     }
@@ -158,9 +188,10 @@ class _SearchFormState extends State<SearchForm> {
                     final result = _fuzzyMatches[index - textMatchCount];
 
                     return ListTile(
+                      trailing: const Icon(Icons.arrow_right_rounded),
                       title: Text(result.item.title),
                       onTap: () {
-                        // Handle selected suggestion here.
+                        _openProductResults(result.item.title);
                       },
                     );
                   },
