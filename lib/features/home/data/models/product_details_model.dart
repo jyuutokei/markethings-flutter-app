@@ -33,9 +33,13 @@ class ProductDetailsModel extends ProductDetailsEntity {
     super.description,
     super.mainImageUrl,
     required super.variants,
+    required super.sellerDisplayName,
+    super.sellerStoreName,
   });
 
   factory ProductDetailsModel.fromJson(Map<String, dynamic> json) {
+    final profile = json['profile'] as Map<String, dynamic>;
+
     return ProductDetailsModel(
       id: json['id'] as int,
       categoryId: json['category_id'] as int,
@@ -46,6 +50,8 @@ class ProductDetailsModel extends ProductDetailsEntity {
       variants: (json['variants'] as List)
           .map((v) => VariantModel.fromJson(v as Map<String, dynamic>))
           .toList(),
+      sellerDisplayName: profile['display_name'] as String,
+      sellerStoreName: profile['store_name'] as String?,
     );
   }
 }
