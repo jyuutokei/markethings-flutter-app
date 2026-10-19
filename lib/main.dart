@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mt/core/router/router.dart';
 import 'package:mt/core/utils/helpers.dart';
+import 'package:mt/features/auth/domain/repository/auth_repo.dart';
+import 'package:mt/features/home/presentation/store/favorites_store.dart';
 import 'package:mt/injection_container.dart';
 import 'package:mt/config/theme/app_theme.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
@@ -12,7 +14,15 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // load services
-  setupLocator();
+  await setupLocator();
+
+  final store = sl<FavoritesStore>();
+  final auth = sl<SupabaseClient>().auth;
+
+  store.syncWithUser(auth.currentUser?.id);
+  sl<AuthRepo>().authStateChange.listen(
+    (_) => store.syncWithUser(auth.currentUser?.id),
+  );
 
   FlutterError.onError = (details) {
     sl<Talker>().handle(details.exception, details.stack);
