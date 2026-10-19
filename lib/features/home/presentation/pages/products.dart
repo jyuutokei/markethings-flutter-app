@@ -10,13 +10,19 @@ import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/category_entity.dart';
 import 'package:mt/features/home/domain/entities/product_card_entity.dart';
 import 'package:mt/features/home/domain/usecases/get_categories.dart';
+import 'package:mt/features/home/domain/usecases/get_product_card_by_category.dart';
+import 'package:mt/features/home/domain/usecases/get_product_card_from_search.dart';
+import 'package:mt/features/home/domain/usecases/get_product_card_from_search_with_category.dart';
 import 'package:mt/features/home/domain/usecases/get_product_card_page.dart';
 import 'package:mt/features/home/presentation/widgets/product_card.dart';
 import 'package:mt/features/home/presentation/widgets/search_form_fake.dart';
 import 'package:mt/injection_container.dart';
 
 class Products extends StatefulWidget {
-  const Products({super.key});
+  final String? searchQuery;
+  final int? categoryId;
+
+  const Products({super.key, this.searchQuery, this.categoryId});
 
   @override
   State<Products> createState() => _ProductsState();
@@ -31,15 +37,48 @@ class _ProductsState extends State<Products> {
   late final _pagingController = PagingController<int, ProductCardEntity>(
     getNextPageKey: (state) =>
         state.lastPageIsEmpty ? null : state.nextIntPageKey,
-    fetchPage: (pageKey) => sl<GetProductCardPage>().call(
-      limit: _pageSize,
-      offset: (pageKey - 1) * _pageSize,
-    ),
+    fetchPage: (pageKey) {
+      // print(pageKey - 1);
+      final offset = (pageKey - 1) * _pageSize;
+      final query = widget.searchQuery?.trim();
+      final selectedCategoryId = categoryId;
+
+      if (query != null && query.isNotEmpty && selectedCategoryId != null) {
+        return sl<GetProductCardFromSearchWithCategory>().call(
+          query: query,
+          categoryId: selectedCategoryId,
+          limit: _pageSize,
+          offset: offset,
+        );
+      }
+
+      if (query != null && query.isNotEmpty) {
+        return sl<GetProductCardFromSearch>().call(
+          query: query,
+          limit: _pageSize,
+          offset: offset,
+        );
+      }
+
+      if (selectedCategoryId != null) {
+        return sl<GetProductCardByCategory>().call(
+          categoryId: selectedCategoryId,
+          limit: _pageSize,
+          offset: offset,
+        );
+      }
+
+      return sl<GetProductCardPage>().call(limit: _pageSize, offset: offset);
+    },
   );
 
   @override
   void initState() {
     super.initState();
+    if (widget.categoryId != null) {
+      categoryId = widget.categoryId;
+      selectedCategoryIndex = widget.categoryId! - 1;
+    }
     _loadCategories();
   }
 
@@ -68,6 +107,9 @@ class _ProductsState extends State<Products> {
   }
 
   void _modalBottomSheet(BuildContext context) {
+    var draftCategoryId = categoryId;
+    var draftIndex = selectedCategoryIndex;
+
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -126,17 +168,15 @@ class _ProductsState extends State<Products> {
                               ),
                               label: Text(_categories[index].name),
                               labelStyle: TextStyle(
-                                color: selectedCategoryIndex == index
+                                color: draftIndex == index
                                     ? Colors.white
                                     : Colors.black,
                               ),
-                              selected: selectedCategoryIndex == index,
+                              selected: draftIndex == index,
                               onSelected: (selected) {
                                 setSheetState(() {
-                                  selectedCategoryIndex = selected
-                                      ? index
-                                      : null;
-                                  categoryId = selected
+                                  draftIndex = selected ? index : null;
+                                  draftCategoryId = selected
                                       ? _categories[index].id
                                       : null;
                                 });
@@ -163,7 +203,17 @@ class _ProductsState extends State<Products> {
                       ),
                     ),
                     const Gap(defaultPadding / 2),
-                    FilledButton(onPressed: () {}, child: const Text("Search")),
+                    FilledButton(
+                      onPressed: () {
+                        setState(() {
+                          categoryId = draftCategoryId;
+                          selectedCategoryIndex = draftIndex;
+                        });
+                        _pagingController.refresh();
+                        Navigator.of(sheetContext).pop();
+                      },
+                      child: const Text("Search"),
+                    ),
                   ],
                 ),
               ],
@@ -182,7 +232,7 @@ class _ProductsState extends State<Products> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
-        title: const SearchFormFake(),
+        title: SearchFormFake(searchQuery: widget.searchQuery),
       ),
       body: Column(
         children: [
@@ -246,6 +296,8 @@ class _ProductsState extends State<Products> {
                             title: product.title,
                             image: product.mainImageUrl,
                             price: product.price,
+                            productId: product.id,
+                            sellerId: product.sellerId,
                             press: () {
                               context.pushNamed(
                                 AppRoute.productDetails,
