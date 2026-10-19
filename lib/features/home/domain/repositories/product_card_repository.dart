@@ -6,4 +6,20 @@ abstract class ProductCardRepository {
     int limit = 10,
     int offset = 0,
   });
+  Future<List<ProductCardEntity>> getProductCardFromSearch({
+    required String query,
+    int limit = 10,
+    int offset = 0,
+  });
+  Future<List<ProductCardEntity>> getProductCardByCategory({
+    required int categoryId,
+    int limit = 10,
+    int offset = 0,
+  });
+  Future<List<ProductCardEntity>> getProductCardFromSearchWithCategory({
+    required int categoryId,
+    required String query,
+    int limit = 10,
+    int offset = 0,
+  });
 }
