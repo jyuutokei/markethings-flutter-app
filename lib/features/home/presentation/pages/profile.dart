@@ -60,7 +60,7 @@ class _ProfileState extends State<Profile> {
       drawer: SidebarNav(controller: _sbxController),
       appBar: AppBarMain(scaffoldKey: _scaffoldKey, title: "Profile"),
       body: _isLoading
-          ? const Center(child: SpinKitPumpingHeart(color: Colors.white))
+          ? const Center(child: SpinKitFadingGrid(color: Colors.white))
           : Column(
               children: [
                 Expanded(
