@@ -103,18 +103,21 @@ final goRouter = GoRouter(
       parentNavigatorKey: rootNavigatorKey,
       path: '/search',
       name: AppRoute.search,
-      pageBuilder: (context, state) => CustomTransitionPage(
-        key: state.pageKey,
-        child: const SearchForm(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SharedAxisTransition(
-            animation: animation,
-            secondaryAnimation: secondaryAnimation,
-            transitionType: SharedAxisTransitionType.vertical,
-            child: child,
-          );
-        },
-      ),
+      pageBuilder: (context, state) {
+        final query = state.extra as String?;
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: SearchForm(searchQuery: query),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SharedAxisTransition(
+              animation: animation,
+              secondaryAnimation: secondaryAnimation,
+              transitionType: SharedAxisTransitionType.vertical,
+              child: child,
+            );
+          },
+        );
+      },
     ),
     GoRoute(
       parentNavigatorKey: rootNavigatorKey,
@@ -173,9 +176,13 @@ final goRouter = GoRouter(
       path: '/products',
       name: AppRoute.products,
       pageBuilder: (context, state) {
+        final args = state.extra as Map<String, dynamic>?;
         return CustomTransitionPage(
           key: state.pageKey,
-          child: const Products(),
+          child: Products(
+            searchQuery: args?['query'],
+            categoryId: args?['categoryId'],
+          ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return SharedAxisTransition(
               animation: animation,
