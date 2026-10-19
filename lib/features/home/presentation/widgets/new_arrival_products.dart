@@ -82,6 +82,8 @@ class _NewArrivalProductsState extends State<NewArrivalProducts> {
                   title: productCardDetail.title,
                   image: productCardDetail.mainImageUrl,
                   price: productCardDetail.price,
+                  productId: productCardDetail.id,
+                  sellerId: productCardDetail.sellerId,
                   press: () {
                     context.pushNamed(
                       AppRoute.productDetails,
