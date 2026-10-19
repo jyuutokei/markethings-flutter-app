@@ -4,6 +4,8 @@ class ProductCardModel extends ProductCardEntity {
   const ProductCardModel({
     required super.id,
     required super.title,
+    required super.categoryId,
+    required super.sellerId,
     super.mainImageUrl,
     required super.price,
     required super.createdAt,
@@ -13,6 +15,8 @@ class ProductCardModel extends ProductCardEntity {
     return ProductCardModel(
       id: json['id'] as int,
       title: json['title'] as String,
+      categoryId: json['category_id'],
+      sellerId: json['seller_id'] as String,
       mainImageUrl: json['main_image_url'] as String?,
       price: (json['price'] as num).toDouble(),
       createdAt: DateTime.parse(json['created_at'] as String),
