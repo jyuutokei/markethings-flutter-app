@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mt/core/router/tab_refresher.dart';
 import 'package:mt/core/router/routes.dart';
@@ -8,6 +7,7 @@ import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/product_details_entity.dart';
 import 'package:mt/features/home/domain/usecases/adjust_cart_item_quantity.dart';
 import 'package:mt/features/home/domain/usecases/get_product_details.dart';
+import 'package:mt/features/home/presentation/store/favorites_store.dart';
 import 'package:mt/features/home/presentation/widgets/product_details.dart';
 import 'package:mt/injection_container.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -103,6 +103,18 @@ class _DetailsState extends State<Details> {
     }
   }
 
+  Future<void> _onToggleFavorite() async {
+    final ok = await sl<FavoritesStore>().toggle(widget.productId as int);
+    if (!ok && mounted) {
+      AppHelpers.showSnackBar(
+        context,
+        "Error",
+        "Failed to update favorites",
+        ContentType.failure,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<ProductDetailsEntity>(
@@ -129,13 +141,27 @@ class _DetailsState extends State<Details> {
               },
             ),
             actions: [
-              IconButton(
-                onPressed: () {},
-                icon: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: SvgPicture.asset("assets/icons/Heart.svg", height: 20),
+              if (hasProductDetails && !isSeller)
+                ValueListenableBuilder<Set<int>>(
+                  valueListenable: sl<FavoritesStore>().ids,
+                  builder: (context, ids, _) {
+                    final isFavorite = ids.contains(
+                      int.parse(widget.productId),
+                    );
+                    return IconButton(
+                      onPressed: _onToggleFavorite,
+                      icon: CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          isFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_border_outlined,
+                          color: Colors.red,
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              ),
               IconButton(
                 onPressed: () {
                   cartTabRefresher.notifyCartTabSelected();

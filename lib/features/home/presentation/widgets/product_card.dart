@@ -1,8 +1,11 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
 import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/utils/helpers.dart';
+import 'package:mt/features/home/presentation/store/favorites_store.dart';
+import 'package:mt/injection_container.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProductCard extends StatefulWidget {
   const ProductCard({
@@ -11,19 +14,39 @@ class ProductCard extends StatefulWidget {
     this.image,
     required this.price,
     required this.press,
+    required this.productId,
+    required this.sellerId,
   });
+
   final String title;
   final String? image;
   final VoidCallback press;
   final num price;
+  final int productId;
+  final String sellerId;
 
   @override
   State<ProductCard> createState() => _ProductCardState();
 }
 
 class _ProductCardState extends State<ProductCard> {
+  Future<void> _onToggleFavorite() async {
+    final ok = await sl<FavoritesStore>().toggle(widget.productId);
+    if (!ok && mounted) {
+      AppHelpers.showSnackBar(
+        context,
+        "Error",
+        "Failed to update favorites",
+        ContentType.failure,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isOwner =
+        sl<SupabaseClient>().auth.currentUser?.id == widget.sellerId;
+
     return GestureDetector(
       onTap: widget.press,
       child: Container(
@@ -67,17 +90,29 @@ class _ProductCardState extends State<ProductCard> {
                 ),
               ],
             ),
-            Positioned(
-              top: 0,
-              right: 0,
-              child: IconButton(
-                onPressed: () {},
-                icon: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: SvgPicture.asset("assets/icons/Heart.svg", height: 20),
+            if (!isOwner)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: ValueListenableBuilder<Set<int>>(
+                  valueListenable: sl<FavoritesStore>().ids,
+                  builder: (context, ids, _) {
+                    final isFavorite = ids.contains(widget.productId);
+                    return IconButton(
+                      onPressed: _onToggleFavorite,
+                      icon: CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          isFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_border_outlined,
+                          color: Colors.red,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
-            ),
           ],
         ),
       ),
