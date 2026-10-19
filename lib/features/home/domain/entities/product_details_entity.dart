@@ -37,6 +37,8 @@ class ProductDetailsEntity extends Equatable {
   final String? description;
   final String? mainImageUrl;
   final List<VariantEntity> variants; // the grouped array
+  final String sellerDisplayName;
+  final String? sellerStoreName;
 
   const ProductDetailsEntity({
     required this.id,
@@ -46,6 +48,8 @@ class ProductDetailsEntity extends Equatable {
     this.description,
     this.mainImageUrl,
     required this.variants,
+    required this.sellerDisplayName,
+    this.sellerStoreName,
   });
 
   @override
@@ -57,5 +61,7 @@ class ProductDetailsEntity extends Equatable {
     ?description,
     ?mainImageUrl,
     variants,
+    sellerDisplayName,
+    ?sellerStoreName,
   ];
 }
