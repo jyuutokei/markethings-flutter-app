@@ -19,4 +19,45 @@ class ProductCardRepositoryImpl implements ProductCardRepository {
   }) {
     return remoteDataSource.getProductCardPage(limit: limit, offset: offset);
   }
+
+  @override
+  Future<List<ProductCardEntity>> getProductCardFromSearch({
+    required String query,
+    int limit = 10,
+    int offset = 0,
+  }) {
+    return remoteDataSource.getProductCardFromSearch(
+      query: query,
+      limit: limit,
+      offset: offset,
+    );
+  }
+
+  @override
+  Future<List<ProductCardEntity>> getProductCardByCategory({
+    required int categoryId,
+    int limit = 10,
+    int offset = 0,
+  }) {
+    return remoteDataSource.getProductCardByCategory(
+      categoryId: categoryId,
+      limit: limit,
+      offset: offset,
+    );
+  }
+
+  @override
+  Future<List<ProductCardEntity>> getProductCardFromSearchWithCategory({
+    required int categoryId,
+    required String query,
+    int limit = 10,
+    int offset = 0,
+  }) {
+    return remoteDataSource.getProductCardFromSearchWithCategory(
+      categoryId: categoryId,
+      query: query,
+      limit: limit,
+      offset: offset,
+    );
+  }
 }
