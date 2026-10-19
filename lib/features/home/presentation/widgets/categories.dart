@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mt/core/constants/constants.dart';
+import 'package:mt/core/router/routes.dart';
 import 'package:mt/features/home/domain/entities/category_entity.dart';
 import 'package:mt/features/home/domain/usecases/get_categories.dart';
 import 'package:mt/injection_container.dart';
@@ -36,7 +38,12 @@ class Categories extends StatelessWidget {
               return CategoryCard(
                 name: category.name,
                 icon: category.imageUrl,
-                press: () {},
+                press: () {
+                  context.pushNamed(
+                    AppRoute.products,
+                    extra: {'categoryId': category.id},
+                  );
+                },
               );
             },
             separatorBuilder: (context, index) => const Gap(defaultPadding),
