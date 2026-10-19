@@ -8,6 +8,22 @@ abstract class ProductCardRemoteDataSource {
     int limit = 10,
     int offset = 0,
   });
+  Future<List<ProductCardModel>> getProductCardFromSearch({
+    required String query,
+    int limit = 10,
+    int offset = 0,
+  });
+  Future<List<ProductCardModel>> getProductCardByCategory({
+    required int categoryId,
+    int limit = 10,
+    int offset = 0,
+  });
+  Future<List<ProductCardModel>> getProductCardFromSearchWithCategory({
+    required int categoryId,
+    required String query,
+    int limit = 10,
+    int offset = 0,
+  });
 }
 
 class ProductCardRemoteDataSourceImpl implements ProductCardRemoteDataSource {
@@ -41,6 +57,79 @@ class ProductCardRemoteDataSourceImpl implements ProductCardRemoteDataSource {
       final response = await _client.rpc(
         'get_product_card_page',
         params: {'_limit': limit, '_offset': offset},
+      );
+
+      return (response as List)
+          .map((row) => ProductCardModel.fromJson(row as Map<String, dynamic>))
+          .toList();
+    } catch (error) {
+      AppHelpers.logger().error(error);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<ProductCardModel>> getProductCardFromSearch({
+    required String query,
+    int limit = 10,
+    int offset = 0,
+  }) async {
+    try {
+      final response = await _client.rpc(
+        'search_products',
+        params: {'_limit': limit, 'search_term': query, '_offset': offset},
+      );
+
+      return (response as List)
+          .map((row) => ProductCardModel.fromJson(row as Map<String, dynamic>))
+          .toList();
+    } catch (error) {
+      AppHelpers.logger().error(error);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<ProductCardModel>> getProductCardByCategory({
+    required int categoryId,
+    int limit = 10,
+    int offset = 0,
+  }) async {
+    try {
+      final response = await _client.rpc(
+        'get_products_by_category',
+        params: {
+          'category_id_param': categoryId,
+          '_limit': limit,
+          '_offset': offset,
+        },
+      );
+
+      return (response as List)
+          .map((row) => ProductCardModel.fromJson(row as Map<String, dynamic>))
+          .toList();
+    } catch (error) {
+      AppHelpers.logger().error(error);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<ProductCardModel>> getProductCardFromSearchWithCategory({
+    required int categoryId,
+    required String query,
+    int limit = 10,
+    int offset = 0,
+  }) async {
+    try {
+      final response = await _client.rpc(
+        'search_products_with_category',
+        params: {
+          '_limit': limit,
+          'category_id_param': categoryId,
+          'search_term': query,
+          '_offset': offset,
+        },
       );
 
       return (response as List)
