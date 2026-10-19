@@ -159,6 +159,16 @@ class _ProductDetailsState extends State<ProductDetails> {
                     widget.productDetails.description ?? "No description",
                   ),
                 ),
+                const Gap(defaultPadding / 2),
+                // display seller name
+                const Text(
+                  "Seller:",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  widget.productDetails.sellerStoreName ??
+                      widget.productDetails.sellerDisplayName,
+                ),
               ],
             ),
           ),
