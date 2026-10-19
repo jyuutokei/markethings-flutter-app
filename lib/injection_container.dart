@@ -4,6 +4,7 @@ import 'package:mt/features/auth/data/repository/auth_repo_impl.dart';
 import 'package:mt/features/auth/domain/repository/auth_repo.dart';
 import 'package:mt/features/home/data/datasources/cart_item_remote_data_source.dart';
 import 'package:mt/features/home/data/datasources/category_remote_data_source.dart';
+import 'package:mt/features/home/data/datasources/favorites_remote_data_source.dart';
 import 'package:mt/features/home/data/datasources/order_remote_data_source.dart';
 import 'package:mt/features/home/data/datasources/product_card_remote_data_source.dart';
 import 'package:mt/features/home/data/datasources/product_details_remote_data_source.dart';
@@ -11,6 +12,7 @@ import 'package:mt/features/home/data/datasources/product_title_remote_data_sour
 import 'package:mt/features/home/data/datasources/profile_remote_data_source.dart';
 import 'package:mt/features/home/data/repositories/cart_item_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/category_repository_impl.dart';
+import 'package:mt/features/home/data/repositories/favorites_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/order_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/product_card_repository_impl.dart';
 import 'package:mt/features/home/data/repositories/product_details_repository_impl.dart';
@@ -18,6 +20,7 @@ import 'package:mt/features/home/data/repositories/product_title_repository_impl
 import 'package:mt/features/home/data/repositories/profile_repository_impl.dart';
 import 'package:mt/features/home/domain/repositories/cart_item_repository.dart';
 import 'package:mt/features/home/domain/repositories/category_repository.dart';
+import 'package:mt/features/home/domain/repositories/favorites_repository.dart';
 import 'package:mt/features/home/domain/repositories/order_repository.dart';
 import 'package:mt/features/home/domain/repositories/product_card_repository.dart';
 import 'package:mt/features/home/domain/repositories/product_details_repository.dart';
@@ -28,12 +31,19 @@ import 'package:mt/features/home/domain/usecases/cancel_order.dart';
 import 'package:mt/features/home/domain/usecases/get_all_product_titles.dart';
 import 'package:mt/features/home/domain/usecases/get_cart_item_details.dart';
 import 'package:mt/features/home/domain/usecases/get_categories.dart';
+import 'package:mt/features/home/domain/usecases/get_favorite_product_ids.dart';
+import 'package:mt/features/home/domain/usecases/get_favorite_products.dart';
 import 'package:mt/features/home/domain/usecases/get_order_details.dart';
+import 'package:mt/features/home/domain/usecases/get_product_card_by_category.dart';
 import 'package:mt/features/home/domain/usecases/get_product_card_details.dart';
+import 'package:mt/features/home/domain/usecases/get_product_card_from_search.dart';
+import 'package:mt/features/home/domain/usecases/get_product_card_from_search_with_category.dart';
 import 'package:mt/features/home/domain/usecases/get_product_card_page.dart';
 import 'package:mt/features/home/domain/usecases/get_product_details.dart';
 import 'package:mt/features/home/domain/usecases/get_user_profile.dart';
 import 'package:mt/features/home/domain/usecases/place_order.dart';
+import 'package:mt/features/home/domain/usecases/toggle_favorite.dart';
+import 'package:mt/features/home/presentation/store/favorites_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 import 'package:mt/config/env/env.dart';
@@ -41,7 +51,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 final sl = GetIt.instance;
 
-void setupLocator() async {
+Future<void> setupLocator() async {
   // supabase
   await Supabase.initialize(url: Env.spbUrl, publishableKey: Env.spbPbkey);
   sl.registerSingleton<SupabaseClient>(Supabase.instance.client);
@@ -49,7 +59,7 @@ void setupLocator() async {
 
   // talker
   sl.registerSingleton<Talker>(TalkerFlutter.init());
-  sl.registerSingleton<TalkerRouteObserver>(TalkerRouteObserver(Talker()));
+  sl.registerSingleton<TalkerRouteObserver>(TalkerRouteObserver(sl<Talker>()));
   sl.registerSingleton<TalkerLogger>(TalkerLogger());
 
   // shared preference
@@ -84,6 +94,9 @@ void setupLocator() async {
   sl.registerLazySingleton<ProductTitleRemoteDataSource>(
     () => ProductTitleRemoteDataSourceImpl(sl<SupabaseClient>()),
   );
+  sl.registerLazySingleton<FavoritesRemoteDataSource>(
+    () => FavoritesRemoteDataSourceImpl(sl<SupabaseClient>()),
+  );
 
   // repositories
   sl.registerLazySingleton<ProductCardRepository>(
@@ -107,6 +120,9 @@ void setupLocator() async {
   sl.registerLazySingleton<ProductTitleRepository>(
     () => ProductTitleRepositoryImpl(sl<ProductTitleRemoteDataSource>()),
   );
+  sl.registerLazySingleton<FavoritesRepository>(
+    () => FavoritesRepositoryImpl(sl<FavoritesRemoteDataSource>()),
+  );
 
   // usecases
   sl.registerLazySingleton<GetProductCardDetails>(
@@ -114,6 +130,12 @@ void setupLocator() async {
   );
   sl.registerLazySingleton<GetProductCardPage>(
     () => GetProductCardPage(sl<ProductCardRepository>()),
+  );
+  sl.registerLazySingleton<GetProductCardFromSearch>(
+    () => GetProductCardFromSearch(sl<ProductCardRepository>()),
+  );
+  sl.registerLazySingleton<GetProductCardByCategory>(
+    () => GetProductCardByCategory(sl<ProductCardRepository>()),
   );
   sl.registerLazySingleton<GetCategories>(
     () => GetCategories(sl<CategoryRepository>()),
@@ -139,5 +161,22 @@ void setupLocator() async {
   );
   sl.registerLazySingleton<GetProductTitles>(
     () => GetProductTitles(sl<ProductTitleRepository>()),
+  );
+  sl.registerLazySingleton<GetProductCardFromSearchWithCategory>(
+    () => GetProductCardFromSearchWithCategory(sl<ProductCardRepository>()),
+  );
+  sl.registerLazySingleton<GetFavoriteProductIds>(
+    () => GetFavoriteProductIds(sl<FavoritesRepository>()),
+  );
+  sl.registerLazySingleton<GetFavoriteProducts>(
+    () => GetFavoriteProducts(sl<FavoritesRepository>()),
+  );
+  sl.registerLazySingleton<ToggleFavorite>(
+    () => ToggleFavorite(sl<FavoritesRepository>()),
+  );
+
+  // stores
+  sl.registerLazySingleton<FavoritesStore>(
+    () => FavoritesStore(sl<GetFavoriteProductIds>(), sl<ToggleFavorite>()),
   );
 }
