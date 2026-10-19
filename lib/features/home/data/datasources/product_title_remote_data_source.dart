@@ -14,10 +14,7 @@ class ProductTitleRemoteDataSourceImpl implements ProductTitleRemoteDataSource {
   @override
   Future<List<ProductTitleModel>> getProductTitles() async {
     try {
-      final response = await _client
-          .from('products')
-          .select('id, title')
-          .limit(15);
+      final response = await _client.from('products').select('id, title');
 
       return (response as List)
           .map((row) => ProductTitleModel.fromJson(row as Map<String, dynamic>))
