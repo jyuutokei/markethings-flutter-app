@@ -19,7 +19,8 @@ class ProductDetailsRemoteDataSourceImpl
           .from('products')
           .select(
             'id, title, category_id, seller_id, description, main_image_url, '
-            'variants:product_variants(id, product_id, name, price, image_url, stock_quantity, attributes)',
+            'variants:product_variants(id, product_id, name, price, image_url, stock_quantity, attributes), '
+            'profile:profiles(display_name, store_name)',
           )
           .eq('id', productId)
           .order('price', referencedTable: 'variants', ascending: true)
