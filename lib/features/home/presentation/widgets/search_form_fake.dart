@@ -6,7 +6,8 @@ import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/router/routes.dart';
 
 class SearchFormFake extends StatelessWidget {
-  const SearchFormFake({super.key});
+  final String? searchQuery;
+  const SearchFormFake({super.key, this.searchQuery});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,13 @@ class SearchFormFake extends StatelessWidget {
       borderRadius: BorderRadius.circular(defaultBorderRadius),
       child: InkWell(
         borderRadius: BorderRadius.circular(defaultBorderRadius),
-        onTap: () => context.pushNamed(AppRoute.search),
+        onTap: () {
+          if (searchQuery != null) {
+            context.pushNamed(AppRoute.search, extra: searchQuery);
+            return;
+          }
+          context.pushNamed(AppRoute.search);
+        },
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: defaultPadding,
@@ -25,9 +32,9 @@ class SearchFormFake extends StatelessWidget {
             children: [
               SvgPicture.asset("assets/icons/Search.svg"),
               const Gap(defaultPadding / 2),
-              const Text(
-                "Search products...",
-                style: TextStyle(color: Colors.grey),
+              Text(
+                searchQuery != null ? searchQuery! : "Search products...",
+                style: const TextStyle(color: Colors.grey),
               ),
             ],
           ),
