@@ -233,6 +233,14 @@ class _ProductsState extends State<Products> {
           onPressed: () => context.pop(),
         ),
         title: SearchFormFake(searchQuery: widget.searchQuery),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home_outlined),
+            onPressed: () {
+              context.goNamed(AppRoute.home);
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
