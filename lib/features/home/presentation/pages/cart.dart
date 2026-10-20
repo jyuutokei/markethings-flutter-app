@@ -1,7 +1,6 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mt/core/constants/constants.dart';
@@ -16,6 +15,7 @@ import 'package:mt/features/home/presentation/widgets/appbar_main.dart';
 import 'package:mt/features/home/presentation/widgets/sidebar.dart';
 import 'package:mt/injection_container.dart';
 import 'package:sidebarx/sidebarx.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class Cart extends StatefulWidget {
   const Cart({super.key});
@@ -145,15 +145,26 @@ class _CartState extends State<Cart> {
       body: FutureBuilder<List<CartItemDetailsEntity>>(
         future: _cartItemsFuture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: SpinKitPianoWave(color: Colors.white));
-          }
+          final loading = snapshot.connectionState == ConnectionState.waiting;
 
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          final cartItems = snapshot.data ?? [];
+          final cartItems = loading
+              ? List.generate(
+                  4,
+                  (index) => CartItemDetailsEntity(
+                    cartItemId: -index - 1,
+                    variantId: -index - 1,
+                    productTitle: 'Product title',
+                    variantName: 'Variant name',
+                    price: 0,
+                    quantity: 1,
+                  ),
+                )
+              : snapshot.data ?? const <CartItemDetailsEntity>[];
+
           final selectedItems = cartItems
               .where((item) => _selectedCartItemIds.contains(item.cartItemId))
               .toList();
@@ -162,87 +173,93 @@ class _CartState extends State<Cart> {
             (sum, item) => sum + item.price * _quantityFor(item),
           );
 
-          return Column(
-            children: [
-              const Gap(defaultPadding / 2),
-              const Text(
-                "Select the item you want to checkout.",
-                textAlign: TextAlign.start,
-              ),
-              const Gap(defaultPadding / 2),
-              Expanded(
-                child: cartItems.isEmpty
-                    ? const Center(child: Text('No items added to cart yet.'))
-                    : ListView.builder(
-                        itemCount: cartItems.length,
-                        itemBuilder: (context, index) {
-                          final item = cartItems[index];
-                          final id = item.cartItemId;
-                          final quantity = _quantityFor(item);
+          if (!loading && cartItems.isEmpty) {
+            return const Center(child: Text('No items added to cart yet.'));
+          }
 
-                          return CartItemCard(
-                            cartItem: item,
-                            quantity: quantity,
-                            isUpdating: _updatingItemIds.contains(id),
-                            isSelected: _selectedCartItemIds.contains(
-                              item.cartItemId,
-                            ),
-                            onTap: () => _toggleSelection(item),
-                            onIncrease: () => _changeQuantity(item, 1),
-                            onDecrease: () => _changeQuantity(item, -1),
-                          );
-                        },
-                      ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(defaultPadding),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Total',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        Text(
-                          AppHelpers.pesoFormatter(total),
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ],
-                    ),
-                    const Gap(defaultPadding / 2),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: selectedItems.isEmpty
-                            ? null
-                            : () {
-                                final checkoutItems = selectedItems
-                                    .map(
-                                      (item) => CartItemDetailsEntity(
-                                        cartItemId: item.cartItemId,
-                                        variantId: item.variantId,
-                                        productTitle: item.productTitle,
-                                        variantName: item.variantName,
-                                        price: item.price,
-                                        quantity: _quantityFor(item),
-                                      ),
-                                    )
-                                    .toList();
-
-                                context.pushNamed(
-                                  AppRoute.checkout,
-                                  extra: checkoutItems,
-                                );
-                              },
-                        child: const Text('Checkout'),
-                      ),
-                    ),
-                  ],
+          return Skeletonizer(
+            enabled: loading,
+            ignorePointers: true,
+            child: Column(
+              children: [
+                const Gap(defaultPadding / 2),
+                const Text(
+                  "Select the item you want to checkout.",
+                  textAlign: TextAlign.start,
                 ),
-              ),
-            ],
+                const Gap(defaultPadding / 2),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: cartItems.length,
+                    itemBuilder: (context, index) {
+                      final item = cartItems[index];
+                      final id = item.cartItemId;
+                      final quantity = _quantityFor(item);
+
+                      return CartItemCard(
+                        cartItem: item,
+                        quantity: quantity,
+                        isUpdating: _updatingItemIds.contains(id),
+                        isSelected: _selectedCartItemIds.contains(
+                          item.cartItemId,
+                        ),
+                        onTap: () => _toggleSelection(item),
+                        onIncrease: () => _changeQuantity(item, 1),
+                        onDecrease: () => _changeQuantity(item, -1),
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(defaultPadding),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Total',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          Text(
+                            AppHelpers.pesoFormatter(total),
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ],
+                      ),
+                      const Gap(defaultPadding / 2),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: selectedItems.isEmpty
+                              ? null
+                              : () {
+                                  final checkoutItems = selectedItems
+                                      .map(
+                                        (item) => CartItemDetailsEntity(
+                                          cartItemId: item.cartItemId,
+                                          variantId: item.variantId,
+                                          productTitle: item.productTitle,
+                                          variantName: item.variantName,
+                                          price: item.price,
+                                          quantity: _quantityFor(item),
+                                        ),
+                                      )
+                                      .toList();
+
+                                  context.pushNamed(
+                                    AppRoute.checkout,
+                                    extra: checkoutItems,
+                                  );
+                                },
+                          child: const Text('Checkout'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),
