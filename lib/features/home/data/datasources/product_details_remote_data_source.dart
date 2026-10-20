@@ -9,8 +9,15 @@ abstract class ProductDetailsRemoteDataSource {
 class ProductDetailsRemoteDataSourceImpl
     implements ProductDetailsRemoteDataSource {
   final SupabaseClient _client;
+  static const _bucket = 'products';
 
   const ProductDetailsRemoteDataSourceImpl(this._client);
+
+  String? _toPublicUrl(String? path) {
+    return path != null
+        ? _client.storage.from(_bucket).getPublicUrl(path)
+        : null;
+  }
 
   @override
   Future<ProductDetailsModel> getProductDetail(int productId) async {
@@ -26,7 +33,27 @@ class ProductDetailsRemoteDataSourceImpl
           .order('price', referencedTable: 'variants', ascending: true)
           .single();
 
-      return ProductDetailsModel.fromJson(response);
+      final productJson = Map<String, dynamic>.from(response);
+
+      productJson['main_image_url'] = _toPublicUrl(
+        productJson['main_image_url'] as String?,
+      );
+
+      productJson['variants'] = (productJson['variants'] as List).map((
+        variant,
+      ) {
+        final variantJson = Map<String, dynamic>.from(
+          variant as Map<String, dynamic>,
+        );
+
+        variantJson['image_url'] = _toPublicUrl(
+          variantJson['image_url'] as String?,
+        );
+
+        return variantJson;
+      }).toList();
+
+      return ProductDetailsModel.fromJson(productJson);
     } catch (error) {
       AppHelpers.logger().error(error);
       rethrow;
