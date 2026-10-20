@@ -1,10 +1,12 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/presentation/store/favorites_store.dart';
 import 'package:mt/injection_container.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProductCard extends StatefulWidget {
@@ -30,6 +32,9 @@ class ProductCard extends StatefulWidget {
 }
 
 class _ProductCardState extends State<ProductCard> {
+  String fallbackImageUrl =
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIVapXPpvWb8ds1BaPIHsUEKnobPWCWI3srk7Wc5hFNA&s=10';
+
   Future<void> _onToggleFavorite() async {
     final ok = await sl<FavoritesStore>().toggle(widget.productId);
     if (!ok && mounted) {
@@ -68,9 +73,28 @@ class _ProductCardState extends State<ProductCard> {
                       Radius.circular(defaultBorderRadius),
                     ),
                   ),
-                  child: Image.asset(
-                    "assets/images/sample/product_0.png",
+                  child: SizedBox(
+                    width: double.infinity,
                     height: 132,
+                    child: Skeleton.replace(
+                      width: double.infinity,
+                      height: 132,
+                      child: CachedNetworkImage(
+                        imageUrl: widget.image ?? fallbackImageUrl,
+                        imageBuilder: (context, imageProvider) => Container(
+                          height: 132,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: imageProvider,
+                            ),
+                          ),
+                        ),
+                        placeholder: (context, url) => const SizedBox.expand(),
+                        errorBuilder: (context, url, error) =>
+                            const Icon(Icons.error),
+                      ),
+                    ),
                   ),
                 ),
                 const Gap(defaultPadding / 2),
