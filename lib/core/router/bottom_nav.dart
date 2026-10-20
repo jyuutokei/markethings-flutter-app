@@ -35,6 +35,9 @@ class _BottomNavState extends State<BottomNav> {
       case 1:
         cartTabRefresher.notifyCartTabSelected();
         break;
+      case 2:
+        favoriteTabRefresher.notifyFavoriteTabSelected();
+        break;
     }
 
     widget.navigationShell.goBranch(
