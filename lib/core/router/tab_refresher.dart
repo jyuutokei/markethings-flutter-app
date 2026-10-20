@@ -11,3 +11,9 @@ class HomeTabRefresher extends ChangeNotifier {
 }
 
 final homeTabRefresher = HomeTabRefresher();
+
+class FavoriteTabRefresher extends ChangeNotifier {
+  void notifyFavoriteTabSelected() => notifyListeners();
+}
+
+final favoriteTabRefresher = FavoriteTabRefresher();
