@@ -7,7 +7,7 @@ class ToggleFavorite {
 
   Future<void> call(int productId, {required bool isCurrentlyFavorite}) {
     return isCurrentlyFavorite
-        ? repository.addFavorite(productId)
-        : repository.removeFavorite(productId);
+        ? repository.removeFavorite(productId)
+        : repository.addFavorite(productId);
   }
 }
