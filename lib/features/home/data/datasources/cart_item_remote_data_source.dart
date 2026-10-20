@@ -13,8 +13,15 @@ abstract class CartItemRemoteDataSource {
 
 class CartItemRemoteDataSourceImpl implements CartItemRemoteDataSource {
   final SupabaseClient _client;
+  static const _bucket = 'products';
 
   CartItemRemoteDataSourceImpl(this._client);
+
+  String? _toPublicUrl(String? path) {
+    return path != null
+        ? _client.storage.from(_bucket).getPublicUrl(path)
+        : null;
+  }
 
   @override
   Future<CartItemAddModel> adjustCartItemQuantity({
@@ -53,7 +60,10 @@ class CartItemRemoteDataSourceImpl implements CartItemRemoteDataSource {
 
       return (response as List)
           .map(
-            (row) => CartItemDetailsModel.fromJson(row as Map<String, dynamic>),
+            (row) => CartItemDetailsModel.fromJson(
+              row as Map<String, dynamic>,
+              imageUrl: _toPublicUrl(row['variant']['image_url'] as String?),
+            ),
           )
           .toList();
     } catch (error) {
