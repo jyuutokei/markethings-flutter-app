@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/router/routes.dart';
+import 'package:mt/core/router/tab_refresher.dart';
 import 'package:mt/features/home/domain/entities/product_card_entity.dart';
 import 'package:mt/features/home/domain/usecases/get_favorite_products.dart';
 import 'package:mt/features/home/presentation/store/favorites_store.dart';
@@ -22,12 +23,32 @@ class Favorites extends StatefulWidget {
 class _FavoritesState extends State<Favorites> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _sbxController = SidebarXController(selectedIndex: 0, extended: true);
-  late final Future<List<ProductCardEntity>> _favoriteProductCardsFuture;
+  static const _pageSize = 6;
+
+  late final _pagingController = PagingController<int, ProductCardEntity>(
+    getNextPageKey: (state) =>
+        state.lastPageIsEmpty ? null : state.nextIntPageKey,
+    fetchPage: (pageKey) => sl<GetFavoriteProducts>().call(
+      limit: _pageSize,
+      offset: (pageKey - 1) * _pageSize,
+    ),
+  );
 
   @override
   void initState() {
     super.initState();
-    _favoriteProductCardsFuture = sl<GetFavoriteProducts>().call();
+    favoriteTabRefresher.addListener(_onFavoriteTabSelected);
+  }
+
+  void _onFavoriteTabSelected() {
+    _pagingController.refresh();
+  }
+
+  @override
+  void dispose() {
+    favoriteTabRefresher.removeListener(_onFavoriteTabSelected);
+    _pagingController.dispose();
+    super.dispose();
   }
 
   @override
@@ -36,30 +57,19 @@ class _FavoritesState extends State<Favorites> {
       key: _scaffoldKey,
       drawer: SidebarNav(controller: _sbxController),
       appBar: AppBarMain(scaffoldKey: _scaffoldKey, title: "Favorites"),
-      body: FutureBuilder<List<ProductCardEntity>>(
-        future: _favoriteProductCardsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: SpinKitPumpingHeart(color: Colors.white),
-            );
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          return ValueListenableBuilder<Set<int>>(
+      body: PagingListener(
+        controller: _pagingController,
+        builder: (context, state, fetchNextPage) {
+          return ValueListenableBuilder(
             valueListenable: sl<FavoritesStore>().ids,
-            builder: (context, ids, _) {
-              final items = snapshot.data!
-                  .where((prd) => ids.contains(prd.id))
-                  .toList();
+            builder: (context, favoriteIds, _) {
+              final visibleState = state.filterItems(
+                (product) => favoriteIds.contains(product.id),
+              );
 
-              if (items.isEmpty) {
-                return const Center(child: Text('No favorites yet'));
-              }
-
-              return GridView.builder(
+              return PagedGridView<int, ProductCardEntity>(
+                state: visibleState,
+                fetchNextPage: fetchNextPage,
                 padding: const EdgeInsets.all(defaultPadding),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
@@ -67,24 +77,22 @@ class _FavoritesState extends State<Favorites> {
                   crossAxisSpacing: defaultPadding,
                   mainAxisSpacing: defaultPadding,
                 ),
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final products = items[index];
-
-                  return ProductCard(
-                    title: products.title,
-                    image: products.mainImageUrl,
-                    price: products.price,
-                    productId: products.id,
-                    sellerId: products.sellerId,
+                builderDelegate: PagedChildBuilderDelegate<ProductCardEntity>(
+                  itemBuilder: (context, product, index) => ProductCard(
+                    title: product.title,
+                    price: product.price,
+                    productId: product.id,
+                    sellerId: product.sellerId,
                     press: () {
                       context.pushNamed(
                         AppRoute.productDetails,
-                        pathParameters: {'productId': products.id.toString()},
+                        pathParameters: {'productId': product.id.toString()},
                       );
                     },
-                  );
-                },
+                  ),
+                  noItemsFoundIndicatorBuilder: (_) =>
+                      const Center(child: Text('No favorites yet')),
+                ),
               );
             },
           );
