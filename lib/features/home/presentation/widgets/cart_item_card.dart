@@ -1,4 +1,5 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:mt/core/constants/constants.dart';
@@ -6,6 +7,7 @@ import 'package:mt/core/router/tab_refresher.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/cart_item_details_entity.dart';
 import 'package:mt/injection_container.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CartItemCard extends StatefulWidget {
@@ -35,6 +37,8 @@ class CartItemCard extends StatefulWidget {
 class _CartItemCardState extends State<CartItemCard> {
   CartItemDetailsEntity get cartItem => widget.cartItem;
   final SupabaseClient _client = sl<SupabaseClient>();
+  String fallbackImageUrl =
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIVapXPpvWb8ds1BaPIHsUEKnobPWCWI3srk7Wc5hFNA&s=10';
 
   Future<void> deleteCartItem(int id) async {
     await _client.from('cart_items').delete().eq('id', id);
@@ -68,7 +72,7 @@ class _CartItemCardState extends State<CartItemCard> {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: Key(cartItem.productTitle),
+      key: ValueKey(cartItem.cartItemId),
       direction: widget.isUpdating
           ? DismissDirection.none
           : DismissDirection.endToStart,
@@ -97,9 +101,23 @@ class _CartItemCardState extends State<CartItemCard> {
                 Radius.circular(defaultBorderRadius),
               ),
             ),
-            child: Image.asset(
-              "assets/images/sample/product_0.png",
-              height: 132,
+            child: Skeleton.replace(
+              width: 56,
+              height: 56,
+              child: CachedNetworkImage(
+                imageUrl: cartItem.imageUrl ?? fallbackImageUrl,
+                imageBuilder: (context, imageProvider) => Container(
+                  height: 56,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: imageProvider,
+                    ),
+                  ),
+                ),
+                placeholder: (context, url) => const SizedBox.expand(),
+                errorBuilder: (context, url, error) => const Icon(Icons.error),
+              ),
             ),
           ),
           title: Column(
