@@ -1,4 +1,6 @@
+import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gap/gap.dart';
 import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/utils/helpers.dart';
@@ -22,6 +24,8 @@ class ProductDetails extends StatefulWidget {
 
 class _ProductDetailsState extends State<ProductDetails> {
   List<VariantEntity> get variants => widget.productDetails.variants;
+  String fallbackImageUrl =
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIVapXPpvWb8ds1BaPIHsUEKnobPWCWI3srk7Wc5hFNA&s=10';
 
   @override
   void initState() {
@@ -51,6 +55,14 @@ class _ProductDetailsState extends State<ProductDetails> {
     return "${variants[widget.selectedVariantIndex!].stockQuantity} pieces available";
   }
 
+  String? variantImageDisplay() {
+    if (widget.selectedVariantIndex != null) {
+      return variants[widget.selectedVariantIndex!].imageUrl;
+    }
+
+    return widget.productDetails.mainImageUrl;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -59,10 +71,17 @@ class _ProductDetailsState extends State<ProductDetails> {
       ),
       child: Column(
         children: [
-          Image.asset(
-            "assets/images/sample/product_0.png",
-            height: MediaQuery.of(context).size.height * 0.4,
-            fit: BoxFit.cover,
+          CachedNetworkImage(
+            imageUrl: variantImageDisplay() ?? fallbackImageUrl,
+            imageBuilder: (context, imageProvider) => Container(
+              height: MediaQuery.of(context).size.height * 0.4,
+              decoration: BoxDecoration(
+                image: DecorationImage(fit: BoxFit.cover, image: imageProvider),
+              ),
+            ),
+            placeholder: (context, url) =>
+                const SpinKitRing(color: Colors.white),
+            errorBuilder: (context, url, error) => const Icon(Icons.error),
           ),
           const SizedBox(height: defaultPadding * 1.5),
           Container(
@@ -113,11 +132,24 @@ class _ProductDetailsState extends State<ProductDetails> {
                         vertical: defaultPadding / 4,
                       ),
                       shape: const StadiumBorder(),
-                      avatar: Image.asset(
-                        "assets/images/sample/product_0.png",
-                        width: 25,
-                        height: 25,
-                        fit: BoxFit.cover,
+                      avatar: CachedNetworkImage(
+                        imageUrl:
+                            variants[index].imageUrl ??
+                            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIVapXPpvWb8ds1BaPIHsUEKnobPWCWI3srk7Wc5hFNA&s=10',
+                        imageBuilder: (context, imageProvider) => Container(
+                          width: 25,
+                          height: 25,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: imageProvider,
+                            ),
+                          ),
+                        ),
+                        placeholder: (context, url) =>
+                            const SpinKitRing(color: Colors.white),
+                        errorBuilder: (context, url, error) =>
+                            const Icon(Icons.error),
                       ),
                       label: Text(
                         widget.productDetails.variants[index].name,
