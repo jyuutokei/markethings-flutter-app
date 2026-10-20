@@ -11,8 +11,15 @@ abstract class OrderRemoteDataSource {
 
 class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
   final SupabaseClient _client;
+  static const _bucket = 'products';
 
   const OrderRemoteDataSourceImpl(this._client);
+
+  String? _toPublicUrl(String? path) {
+    return path != null
+        ? _client.storage.from(_bucket).getPublicUrl(path)
+        : null;
+  }
 
   @override
   Future<PlacedOrderModel> placeOrder({required List<int> cartItemIds}) async {
@@ -41,9 +48,21 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
           )
           .order('created_at', ascending: false);
 
-      return (response as List)
-          .map((row) => OrderCardModel.fromJson(row as Map<String, dynamic>))
-          .toList();
+      return (response as List).map((row) {
+        final orderJson = Map<String, dynamic>.from(row as Map);
+
+        orderJson['order_items'] = (orderJson['order_items'] as List).map((
+          item,
+        ) {
+          final itemJson = Map<String, dynamic>.from(item as Map);
+          itemJson['image_url'] = _toPublicUrl(
+            itemJson['image_url'] as String?,
+          );
+          return itemJson;
+        }).toList();
+
+        return OrderCardModel.fromJson(orderJson);
+      }).toList();
     } catch (error) {
       AppHelpers.logger().error(error);
       rethrow;
