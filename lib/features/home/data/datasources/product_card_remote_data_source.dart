@@ -28,8 +28,15 @@ abstract class ProductCardRemoteDataSource {
 
 class ProductCardRemoteDataSourceImpl implements ProductCardRemoteDataSource {
   final SupabaseClient _client;
+  static const _bucket = 'products';
 
   const ProductCardRemoteDataSourceImpl(this._client);
+
+  String? _toPublicUrl(String? path) {
+    return path != null
+        ? _client.storage.from(_bucket).getPublicUrl(path)
+        : null;
+  }
 
   @override
   Future<List<ProductCardModel>> getProductCardDetails([int? limit]) async {
@@ -40,7 +47,12 @@ class ProductCardRemoteDataSourceImpl implements ProductCardRemoteDataSource {
       );
 
       return (response as List)
-          .map((row) => ProductCardModel.fromJson(row as Map<String, dynamic>))
+          .map(
+            (row) => ProductCardModel.fromJson(
+              row as Map<String, dynamic>,
+              imageUrl: _toPublicUrl(row['main_image_url'] as String?),
+            ),
+          )
           .toList();
     } catch (error) {
       AppHelpers.logger().error(error);
@@ -60,7 +72,12 @@ class ProductCardRemoteDataSourceImpl implements ProductCardRemoteDataSource {
       );
 
       return (response as List)
-          .map((row) => ProductCardModel.fromJson(row as Map<String, dynamic>))
+          .map(
+            (row) => ProductCardModel.fromJson(
+              row as Map<String, dynamic>,
+              imageUrl: _toPublicUrl(row['main_image_url'] as String?),
+            ),
+          )
           .toList();
     } catch (error) {
       AppHelpers.logger().error(error);
@@ -81,7 +98,12 @@ class ProductCardRemoteDataSourceImpl implements ProductCardRemoteDataSource {
       );
 
       return (response as List)
-          .map((row) => ProductCardModel.fromJson(row as Map<String, dynamic>))
+          .map(
+            (row) => ProductCardModel.fromJson(
+              row as Map<String, dynamic>,
+              imageUrl: _toPublicUrl(row['main_image_url'] as String?),
+            ),
+          )
           .toList();
     } catch (error) {
       AppHelpers.logger().error(error);
@@ -106,7 +128,12 @@ class ProductCardRemoteDataSourceImpl implements ProductCardRemoteDataSource {
       );
 
       return (response as List)
-          .map((row) => ProductCardModel.fromJson(row as Map<String, dynamic>))
+          .map(
+            (row) => ProductCardModel.fromJson(
+              row as Map<String, dynamic>,
+              imageUrl: _toPublicUrl(row['main_image_url'] as String?),
+            ),
+          )
           .toList();
     } catch (error) {
       AppHelpers.logger().error(error);
@@ -133,7 +160,12 @@ class ProductCardRemoteDataSourceImpl implements ProductCardRemoteDataSource {
       );
 
       return (response as List)
-          .map((row) => ProductCardModel.fromJson(row as Map<String, dynamic>))
+          .map(
+            (row) => ProductCardModel.fromJson(
+              row as Map<String, dynamic>,
+              imageUrl: _toPublicUrl(row['main_image_url'] as String?),
+            ),
+          )
           .toList();
     } catch (error) {
       AppHelpers.logger().error(error);
