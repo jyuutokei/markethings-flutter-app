@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:mt/features/home/domain/entities/order_card_entity.dart';
 import 'package:mt/features/home/domain/usecases/get_order_details.dart';
 import 'package:mt/features/home/presentation/widgets/appbar_sub.dart';
 import 'package:mt/features/home/presentation/widgets/order_card.dart';
 import 'package:mt/injection_container.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class Orders extends StatefulWidget {
   const Orders({super.key});
@@ -29,26 +29,40 @@ class _OrdersState extends State<Orders> {
       body: FutureBuilder<List<OrderCardEntity>>(
         future: _orderItemsFuture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: SpinKitFadingCube(color: Colors.white));
-          }
+          final loading = snapshot.connectionState == ConnectionState.waiting;
 
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          final orderItems = snapshot.data ?? [];
+          final orderItems = loading
+              ? List.generate(
+                  7,
+                  (index) => OrderCardEntity(
+                    id: -index - 1,
+                    status: 'shipped',
+                    createdAt: DateTime(2000),
+                    items: const [],
+                  ),
+                )
+              : snapshot.data ?? const <OrderCardEntity>[];
 
-          return orderItems.isEmpty
-              ? const Center(child: Text('No orders recorded yet.'))
-              : ListView.builder(
-                  itemCount: orderItems.length,
-                  itemBuilder: (context, index) {
-                    final orderItem = orderItems[index];
+          if (!loading && orderItems.isEmpty) {
+            return const Center(child: Text('No orders recorded yet.'));
+          }
 
-                    return OrderCard(orderItem: orderItem);
-                  },
-                );
+          return Skeletonizer(
+            enabled: loading,
+            ignorePointers: true,
+            child: ListView.builder(
+              itemCount: orderItems.length,
+              itemBuilder: (context, index) {
+                final orderItem = orderItems[index];
+
+                return OrderCard(orderItem: orderItem);
+              },
+            ),
+          );
         },
       ),
     );
