@@ -149,6 +149,12 @@ class _SearchFormState extends State<SearchForm> {
                 _onQueryChanged('');
               },
             ),
+          IconButton(
+            icon: const Icon(Icons.home_outlined),
+            onPressed: () {
+              context.goNamed(AppRoute.home);
+            },
+          ),
         ],
       ),
       body: _isLoading
