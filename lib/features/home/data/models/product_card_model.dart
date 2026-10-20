@@ -11,13 +11,16 @@ class ProductCardModel extends ProductCardEntity {
     required super.createdAt,
   });
 
-  factory ProductCardModel.fromJson(Map<String, dynamic> json) {
+  factory ProductCardModel.fromJson(
+    Map<String, dynamic> json, {
+    required String? imageUrl,
+  }) {
     return ProductCardModel(
       id: json['id'] as int,
       title: json['title'] as String,
       categoryId: json['category_id'],
       sellerId: json['seller_id'] as String,
-      mainImageUrl: json['main_image_url'] as String?,
+      mainImageUrl: imageUrl,
       price: (json['price'] as num).toDouble(),
       createdAt: DateTime.parse(json['created_at'] as String),
     );
