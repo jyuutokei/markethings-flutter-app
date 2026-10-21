@@ -9,6 +9,7 @@ abstract class AppRoute {
   static const orderConfirm = 'order_confirm';
   static const orders = 'orders';
   static const products = 'products';
+  static const myProducts = 'my_products';
 
   static const login = 'login';
   static const confirmEmailOtp = 'confirm_email_otp';
@@ -28,5 +29,6 @@ abstract class AppRouteGuard {
     '/order_confirm',
     '/orders',
     '/products',
+    '/my_products',
   };
 }
