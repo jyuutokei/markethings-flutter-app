@@ -33,15 +33,16 @@ class AppBarMain extends StatelessWidget implements PreferredSizeWidget {
           Text(title),
         ],
       ),
-      // actions: [
-      //   IconButton(
-      //     icon: SvgPicture.asset(
-      //       "assets/icons/Notification.svg",
-      //       colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-      //     ),
-      //     onPressed: () {},
-      //   ),
-      // ],
+      actions: const [
+        Gap(defaultPadding * 2),
+        // IconButton(
+        //   icon: SvgPicture.asset(
+        //     "assets/icons/Notification.svg",
+        //     colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+        //   ),
+        //   onPressed: () {},
+        // ),
+      ],
     );
   }
 }
