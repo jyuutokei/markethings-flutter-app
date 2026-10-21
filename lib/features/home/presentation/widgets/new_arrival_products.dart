@@ -55,7 +55,9 @@ class _NewArrivalProductsState extends State<NewArrivalProducts> {
         FutureBuilder<List<ProductCardEntity>>(
           future: _productsFuture,
           builder: (context, snapshot) {
-            final loading = snapshot.connectionState == ConnectionState.waiting;
+            final loading =
+                !snapshot.hasData &&
+                snapshot.connectionState != ConnectionState.done;
 
             if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
@@ -78,33 +80,48 @@ class _NewArrivalProductsState extends State<NewArrivalProducts> {
             return Skeletonizer(
               enabled: loading,
               ignorePointers: true,
-              child: GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(defaultPadding),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: MediaQuery.of(context).size.width > 600
-                      ? 3
-                      : 2,
-                  childAspectRatio: 0.75,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: productCardDetails.length,
-                itemBuilder: (context, index) {
-                  final productCardDetail = productCardDetails[index];
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final columns = ProductCard.productGridColumns(
+                    constraints.maxWidth,
+                  );
+                  const spacing = 16.0;
 
-                  return ProductCard(
-                    title: productCardDetail.title,
-                    image: productCardDetail.mainImageUrl,
-                    price: productCardDetail.price,
-                    productId: productCardDetail.id,
-                    sellerId: productCardDetail.sellerId,
-                    press: () {
-                      context.pushNamed(
-                        AppRoute.productDetails,
-                        pathParameters: {
-                          'productId': productCardDetail.id.toString(),
+                  final tileWidth =
+                      (constraints.maxWidth -
+                          defaultPadding * 2 -
+                          spacing * (columns - 1)) /
+                      columns;
+
+                  return GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.all(defaultPadding),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: columns,
+                      mainAxisExtent: ProductCard.estimatedHeightForWidth(
+                        tileWidth,
+                      ),
+                      crossAxisSpacing: spacing,
+                      mainAxisSpacing: spacing,
+                    ),
+                    itemCount: productCardDetails.length,
+                    itemBuilder: (context, index) {
+                      final productCardDetail = productCardDetails[index];
+
+                      return ProductCard(
+                        title: productCardDetail.title,
+                        image: productCardDetail.mainImageUrl,
+                        price: productCardDetail.price,
+                        productId: productCardDetail.id,
+                        sellerId: productCardDetail.sellerId,
+                        press: () {
+                          context.pushNamed(
+                            AppRoute.productDetails,
+                            pathParameters: {
+                              'productId': productCardDetail.id.toString(),
+                            },
+                          );
                         },
                       );
                     },
