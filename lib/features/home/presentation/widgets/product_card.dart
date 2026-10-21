@@ -27,6 +27,27 @@ class ProductCard extends StatefulWidget {
   final int productId;
   final String sellerId;
 
+  static double imageHeightForWidth(double width) =>
+      (width * 0.85).clamp(96.0, 132.0).toDouble();
+
+  static double estimatedHeightForWidth(double width) {
+    final imageHeight = imageHeightForWidth(width);
+
+    return defaultPadding +
+        imageHeight +
+        (defaultPadding / 1.5) +
+        40 +
+        (defaultPadding / 2) +
+        20;
+  }
+
+  static int productGridColumns(double availableWidth) {
+    if (availableWidth < 600) return 2;
+    if (availableWidth < 900) return 3;
+    if (availableWidth < 1200) return 4;
+    return 5;
+  }
+
   @override
   State<ProductCard> createState() => _ProductCardState();
 }
@@ -52,94 +73,104 @@ class _ProductCardState extends State<ProductCard> {
     final isOwner =
         sl<SupabaseClient>().auth.currentUser?.id == widget.sellerId;
 
-    return GestureDetector(
-      onTap: widget.press,
-      child: Container(
-        width: 154,
-        padding: const EdgeInsets.all(defaultPadding / 2),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(defaultBorderRadius)),
-        ),
-        child: Stack(
-          children: [
-            Column(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final imageHeight = ProductCard.imageHeightForWidth(
+          constraints.maxWidth,
+        );
+
+        return GestureDetector(
+          onTap: widget.press,
+          child: Container(
+            padding: const EdgeInsets.all(defaultPadding / 2),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.all(
+                Radius.circular(defaultBorderRadius),
+              ),
+            ),
+            child: Stack(
               children: [
-                Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFEFBF9),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(defaultBorderRadius),
-                    ),
-                  ),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 132,
-                    child: Skeleton.replace(
+                Column(
+                  children: [
+                    Container(
                       width: double.infinity,
-                      height: 132,
-                      child: CachedNetworkImage(
-                        imageUrl: widget.image ?? fallbackImageUrl,
-                        imageBuilder: (context, imageProvider) => Container(
-                          height: 132,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              fit: BoxFit.cover,
-                              image: imageProvider,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFEFBF9),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(defaultBorderRadius),
+                        ),
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: imageHeight,
+                        child: Skeleton.replace(
+                          width: double.infinity,
+                          height: imageHeight,
+                          child: CachedNetworkImage(
+                            imageUrl: widget.image ?? fallbackImageUrl,
+                            imageBuilder: (context, imageProvider) => Container(
+                              height: imageHeight,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  fit: BoxFit.cover,
+                                  image: imageProvider,
+                                ),
+                              ),
                             ),
+                            placeholder: (context, url) =>
+                                const SizedBox.expand(),
+                            errorBuilder: (context, url, error) =>
+                                const Icon(Icons.error),
                           ),
                         ),
-                        placeholder: (context, url) => const SizedBox.expand(),
-                        errorBuilder: (context, url, error) =>
-                            const Icon(Icons.error),
                       ),
                     ),
-                  ),
+                    const Gap(defaultPadding / 1.5),
+                    Text(
+                      widget.title,
+                      style: const TextStyle(color: Colors.black),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Gap(defaultPadding),
+                    Text(
+                      AppHelpers.pesoFormatter(widget.price),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppHelpers.primaryColor(context),
+                      ),
+                    ),
+                  ],
                 ),
-                const Gap(defaultPadding / 2),
-                Expanded(
-                  child: Text(
-                    widget.title,
-                    style: const TextStyle(color: Colors.black),
+                if (!isOwner)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: ValueListenableBuilder<Set<int>>(
+                      valueListenable: sl<FavoritesStore>().ids,
+                      builder: (context, ids, _) {
+                        final isFavorite = ids.contains(widget.productId);
+                        return IconButton(
+                          onPressed: _onToggleFavorite,
+                          icon: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Icon(
+                              isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border_outlined,
+                              color: Colors.red,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-                const Gap(defaultPadding / 4),
-                Text(
-                  AppHelpers.pesoFormatter(widget.price),
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppHelpers.primaryColor(context),
-                  ),
-                ),
               ],
             ),
-            if (!isOwner)
-              Positioned(
-                top: 0,
-                right: 0,
-                child: ValueListenableBuilder<Set<int>>(
-                  valueListenable: sl<FavoritesStore>().ids,
-                  builder: (context, ids, _) {
-                    final isFavorite = ids.contains(widget.productId);
-                    return IconButton(
-                      onPressed: _onToggleFavorite,
-                      icon: CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          isFavorite
-                              ? Icons.favorite
-                              : Icons.favorite_border_outlined,
-                          color: Colors.red,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
