@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mt/features/home/domain/usecases/get_favorite_product_ids.dart';
 import 'package:mt/features/home/domain/usecases/toggle_favorite.dart';
 
-class FavoritesStore {
+class FavoritesStore extends ChangeNotifier {
   final GetFavoriteProductIds _getIds;
   final ToggleFavorite _toggle;
 
@@ -55,6 +55,7 @@ class FavoritesStore {
 
     try {
       await _toggle.call(productId, isCurrentlyFavorite: wasFavorite);
+      notifyListeners();
       return true;
     } catch (_) {
       _set(productId, wasFavorite); // rollback
