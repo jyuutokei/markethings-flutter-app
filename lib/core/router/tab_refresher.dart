@@ -17,3 +17,9 @@ class FavoriteTabRefresher extends ChangeNotifier {
 }
 
 final favoriteTabRefresher = FavoriteTabRefresher();
+
+class ProfileTabRefresher extends ChangeNotifier {
+  void notifyProfileTabSelected() => notifyListeners();
+}
+
+final profileTabRefresher = ProfileTabRefresher();
