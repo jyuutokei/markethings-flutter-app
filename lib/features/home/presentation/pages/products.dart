@@ -17,6 +17,7 @@ import 'package:mt/features/home/domain/usecases/get_product_card_page.dart';
 import 'package:mt/features/home/presentation/widgets/product_card.dart';
 import 'package:mt/features/home/presentation/widgets/search_form_fake.dart';
 import 'package:mt/injection_container.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class Products extends StatefulWidget {
   final String? searchQuery;
@@ -286,20 +287,32 @@ class _ProductsState extends State<Products> {
               child: PagingListener(
                 controller: _pagingController,
                 builder: (context, state, fetchNextPage) {
-                  return PagedGridView<int, ProductCardEntity>(
-                    state: state,
-                    fetchNextPage: fetchNextPage,
-                    padding: const EdgeInsets.all(defaultPadding),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: MediaQuery.sizeOf(context).width > 600
-                          ? 3
-                          : 2,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
-                    builderDelegate:
-                        PagedChildBuilderDelegate<ProductCardEntity>(
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final columns = ProductCard.productGridColumns(
+                        constraints.maxWidth,
+                      );
+                      const spacing = 16.0;
+
+                      final tileWidth =
+                          (constraints.maxWidth -
+                              defaultPadding * 2 -
+                              spacing * (columns - 1)) /
+                          columns;
+
+                      return PagedGridView<int, ProductCardEntity>(
+                        state: state,
+                        fetchNextPage: fetchNextPage,
+                        padding: const EdgeInsets.all(defaultPadding),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: columns,
+                          mainAxisExtent: ProductCard.estimatedHeightForWidth(
+                            tileWidth,
+                          ),
+                          crossAxisSpacing: spacing,
+                          mainAxisSpacing: spacing,
+                        ),
+                        builderDelegate: PagedChildBuilderDelegate<ProductCardEntity>(
                           itemBuilder: (context, product, index) => ProductCard(
                             title: product.title,
                             image: product.mainImageUrl,
@@ -315,7 +328,48 @@ class _ProductsState extends State<Products> {
                               );
                             },
                           ),
+                          firstPageProgressIndicatorBuilder: (_) =>
+                              Skeletonizer.zone(
+                                child: Wrap(
+                                  spacing: spacing,
+                                  runSpacing: spacing,
+                                  children: List.generate(
+                                    _pageSize,
+                                    (_) => SizedBox(
+                                      width: tileWidth,
+                                      height:
+                                          ProductCard.estimatedHeightForWidth(
+                                            tileWidth,
+                                          ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(
+                                          defaultPadding / 2,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            Bone(
+                                              width: double.infinity,
+                                              height:
+                                                  ProductCard.imageHeightForWidth(
+                                                    tileWidth,
+                                                  ),
+                                            ),
+                                            const Gap(defaultPadding / 1.5),
+                                            const Bone.text(words: 2),
+                                            const Gap(defaultPadding),
+                                            const Bone.text(words: 2),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                         ),
+                      );
+                    },
                   );
                 },
               ),
