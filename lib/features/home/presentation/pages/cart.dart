@@ -11,10 +11,7 @@ import 'package:mt/features/home/domain/entities/cart_item_details_entity.dart';
 import 'package:mt/features/home/domain/usecases/adjust_cart_item_quantity.dart';
 import 'package:mt/features/home/domain/usecases/get_cart_item_details.dart';
 import 'package:mt/features/home/presentation/widgets/cart_item_card.dart';
-import 'package:mt/features/home/presentation/widgets/appbar_main.dart';
-import 'package:mt/features/home/presentation/widgets/sidebar.dart';
 import 'package:mt/injection_container.dart';
-import 'package:sidebarx/sidebarx.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class Cart extends StatefulWidget {
@@ -26,9 +23,6 @@ class Cart extends StatefulWidget {
 
 class _CartState extends State<Cart> {
   late Future<List<CartItemDetailsEntity>> _cartItemsFuture;
-
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final _sbxController = SidebarXController(selectedIndex: 0, extended: true);
 
   final Map<int, int> _quantities = {};
   final Map<int, int> _pendingDeltas = {};
@@ -139,13 +133,12 @@ class _CartState extends State<Cart> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
-      drawer: SidebarNav(controller: _sbxController),
-      appBar: AppBarMain(scaffoldKey: _scaffoldKey, title: 'Shopping cart'),
       body: FutureBuilder<List<CartItemDetailsEntity>>(
         future: _cartItemsFuture,
         builder: (context, snapshot) {
-          final loading = snapshot.connectionState == ConnectionState.waiting;
+          final loading =
+              !snapshot.hasData &&
+              snapshot.connectionState != ConnectionState.done;
 
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
