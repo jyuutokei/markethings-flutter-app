@@ -150,13 +150,16 @@ class _CartItemCardState extends State<CartItemCard> {
               const Gap(defaultPadding / 16),
             ],
           ),
-          subtitle: Text(
-            AppHelpers.pesoFormatter(cartItem.price * widget.quantity),
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: widget.isSelected
-                  ? Colors.white
-                  : AppHelpers.primaryColor(context),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: defaultPadding / 4),
+            child: Text(
+              AppHelpers.pesoFormatter(cartItem.price * widget.quantity),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: widget.isSelected
+                    ? Colors.white
+                    : AppHelpers.primaryColor(context),
+              ),
             ),
           ),
           trailing: Row(
