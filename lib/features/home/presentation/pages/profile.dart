@@ -7,11 +7,8 @@ import 'package:mt/core/router/routes.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/profile_entity.dart';
 import 'package:mt/features/home/domain/usecases/get_user_profile.dart';
-import 'package:mt/features/home/presentation/widgets/appbar_main.dart';
 import 'package:mt/features/home/presentation/widgets/profile_header.dart';
-import 'package:mt/features/home/presentation/widgets/sidebar.dart';
 import 'package:mt/injection_container.dart';
-import 'package:sidebarx/sidebarx.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Profile extends StatefulWidget {
@@ -25,9 +22,6 @@ class _ProfileState extends State<Profile> {
   final user = sl<SupabaseClient>().auth.currentUser;
   late ProfileEntity _profile;
   bool _isLoading = true;
-
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final _sbxController = SidebarXController(selectedIndex: 0, extended: true);
 
   @override
   void initState() {
@@ -56,9 +50,6 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
-      drawer: SidebarNav(controller: _sbxController),
-      appBar: AppBarMain(scaffoldKey: _scaffoldKey, title: "Profile"),
       body: _isLoading
           ? const Center(child: SpinKitFadingGrid(color: Colors.white))
           : Column(
@@ -80,14 +71,38 @@ class _ProfileState extends State<Profile> {
                         ),
                         const Gap(defaultPadding),
                         ListTile(
+                          tileColor: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(defaultBorderRadius),
+                            ),
+                          ),
                           leading: const Icon(
                             Icons.shopping_bag,
-                            color: Colors.white,
+                            color: Color(0xFF046EF4),
                           ),
                           title: const Text("My Orders"),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {
                             context.pushNamed(AppRoute.orders);
+                          },
+                        ),
+                        const Gap(defaultPadding / 2),
+                        ListTile(
+                          tileColor: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(defaultBorderRadius),
+                            ),
+                          ),
+                          leading: const Icon(
+                            Icons.add_card,
+                            color: Color(0xFF046EF4),
+                          ),
+                          title: const Text("My Products"),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () {
+                            context.pushNamed(AppRoute.myProducts);
                           },
                         ),
                       ],
