@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mt/core/router/tab_refresher.dart';
+import 'package:mt/features/home/presentation/widgets/appbar_main.dart';
+import 'package:mt/features/home/presentation/widgets/sidebar.dart';
+import 'package:sidebarx/sidebarx.dart';
 
 class BottomNav extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -15,6 +18,8 @@ class BottomNav extends StatefulWidget {
 
 class _BottomNavState extends State<BottomNav> {
   bool _isLoading = true;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _sbxController = SidebarXController(selectedIndex: 0, extended: true);
 
   @override
   void initState() {
@@ -28,22 +33,40 @@ class _BottomNavState extends State<BottomNav> {
   }
 
   void _onItemTapped(int index) {
+    final currentIndex = widget.navigationShell.currentIndex;
+    if (currentIndex == index) return;
+
+    widget.navigationShell.goBranch(index);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || widget.navigationShell.currentIndex != index) return;
+
+      switch (index) {
+        case 0:
+          homeTabRefresher.notifyHomeTabSelected();
+        case 1:
+          cartTabRefresher.notifyCartTabSelected();
+        case 2:
+          favoriteTabRefresher.notifyFavoriteTabSelected();
+        case 3:
+          profileTabRefresher.notifyProfileTabSelected();
+      }
+    });
+  }
+
+  String _titleFor(int index) {
     switch (index) {
       case 0:
-        homeTabRefresher.notifyHomeTabSelected();
-        break;
+        return 'Home';
       case 1:
-        cartTabRefresher.notifyCartTabSelected();
-        break;
+        return 'Shopping cart';
       case 2:
-        favoriteTabRefresher.notifyFavoriteTabSelected();
-        break;
+        return 'Favorites';
+      case 3:
+        return 'Profile';
+      default:
+        return '';
     }
-
-    widget.navigationShell.goBranch(
-      index,
-      initialLocation: index == widget.navigationShell.currentIndex,
-    );
   }
 
   @override
@@ -57,6 +80,12 @@ class _BottomNavState extends State<BottomNav> {
     }
 
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: SidebarNav(controller: _sbxController),
+      appBar: AppBarMain(
+        scaffoldKey: _scaffoldKey,
+        title: _titleFor(widget.navigationShell.currentIndex),
+      ),
       body: widget.navigationShell,
       bottomNavigationBar: NavigationBar(
         surfaceTintColor: Colors.transparent,
