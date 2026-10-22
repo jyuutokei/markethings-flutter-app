@@ -12,6 +12,7 @@ import 'package:mt/features/auth/presentation/pages/login.dart';
 import 'package:mt/features/home/domain/entities/cart_item_details_entity.dart';
 import 'package:mt/features/home/presentation/pages/cart.dart';
 import 'package:mt/features/home/presentation/pages/checkout.dart';
+import 'package:mt/features/home/presentation/pages/create_product.dart';
 import 'package:mt/features/home/presentation/pages/details.dart';
 import 'package:mt/features/home/presentation/pages/favorites.dart';
 import 'package:mt/features/home/presentation/pages/home.dart';
@@ -203,6 +204,19 @@ final goRouter = GoRouter(
         return CustomTransitionPage(
           key: state.pageKey,
           child: const MyProducts(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(opacity: animation, child: child),
+        );
+      },
+    ),
+    GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
+      path: '/create_product',
+      name: AppRoute.createProduct,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: const CreateProduct(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>
               FadeTransition(opacity: animation, child: child),
         );
