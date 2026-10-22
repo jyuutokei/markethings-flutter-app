@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/router/routes.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/cart_item_details_entity.dart';
 import 'package:mt/features/home/domain/usecases/place_order.dart';
 import 'package:mt/features/home/presentation/widgets/appbar_sub.dart';
+import 'package:mt/features/home/presentation/widgets/payment_form.dart';
 import 'package:mt/injection_container.dart';
 
 class Checkout extends StatefulWidget {
@@ -53,20 +56,59 @@ class _CheckoutState extends State<Checkout> {
         },
         onStepCancel: () => setState(() => _step = (_step - 1).clamp(0, 2)),
         steps: [
-          const Step(
-            title: Text('Shipping'),
+          Step(
+            title: const Text('Shipping'),
             content: Column(
               children: [
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Address',
+                const Gap(defaultPadding / 2),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'Recipient name',
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 8),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'City',
+                const Gap(defaultPadding / 2),
+                TextFormField(
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone number',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const Gap(defaultPadding / 2),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'Street address',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const Gap(defaultPadding / 2),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'Barangay/Neighborhood',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const Gap(defaultPadding / 2),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'City/Municipality',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const Gap(defaultPadding / 2),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'State/Province',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const Gap(defaultPadding / 2),
+                TextFormField(
+                  // ph lenght postal code
+                  maxLength: 4,
+                  decoration: const InputDecoration(
+                    labelText: 'ZIP/Postal code',
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -75,13 +117,7 @@ class _CheckoutState extends State<Checkout> {
           ),
           const Step(
             title: Text('Payment'),
-            content: TextField(
-              decoration: InputDecoration(
-                labelText: 'Card Number',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
+            content: Column(children: [Gap(defaultPadding), PaymentForm()]),
           ),
           Step(
             title: const Text('Summary'),
