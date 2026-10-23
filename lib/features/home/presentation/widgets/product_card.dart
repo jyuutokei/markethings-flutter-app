@@ -127,13 +127,15 @@ class _ProductCardState extends State<ProductCard> {
                       ),
                     ),
                     const Gap(defaultPadding / 1.5),
-                    Text(
-                      widget.title,
-                      style: const TextStyle(color: Colors.black),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    Expanded(
+                      child: Text(
+                        widget.title,
+                        style: const TextStyle(color: Colors.black),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    const Gap(defaultPadding),
+                    const Gap(defaultPadding / 2),
                     Text(
                       AppHelpers.pesoFormatter(widget.price),
                       style: TextStyle(
