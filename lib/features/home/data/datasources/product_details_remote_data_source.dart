@@ -34,6 +34,7 @@ class ProductDetailsRemoteDataSourceImpl
           .single();
 
       final productJson = Map<String, dynamic>.from(response);
+      productJson['main_image_path'] = productJson['main_image_url'] as String?;
 
       productJson['main_image_url'] = _toPublicUrl(
         productJson['main_image_url'] as String?,
@@ -45,6 +46,7 @@ class ProductDetailsRemoteDataSourceImpl
         final variantJson = Map<String, dynamic>.from(
           variant as Map<String, dynamic>,
         );
+        variantJson['image_path'] = variantJson['image_url'] as String?;
 
         variantJson['image_url'] = _toPublicUrl(
           variantJson['image_url'] as String?,
