@@ -34,24 +34,30 @@ class ProfileHeader extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                CachedNetworkImage(
-                  imageUrl:
-                      avatarUrl ??
-                      'https://static.wikia.nocookie.net/zenless-zone-zero/images/5/53/Avatar_Default_Anonymous.png/revision/latest?cb=20240725210433',
-                  imageBuilder: (context, imageProvider) => Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: imageProvider,
+                Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: CachedNetworkImage(
+                    imageUrl:
+                        avatarUrl ??
+                        'https://static.wikia.nocookie.net/zenless-zone-zero/images/5/53/Avatar_Default_Anonymous.png/revision/latest?cb=20240725210433',
+                    imageBuilder: (context, imageProvider) => Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: imageProvider,
+                        ),
                       ),
                     ),
+                    placeholder: (context, url) =>
+                        const SpinKitRing(color: Colors.white),
+                    errorBuilder: (context, url, error) =>
+                        const Icon(Icons.error),
                   ),
-                  placeholder: (context, url) =>
-                      const SpinKitRing(color: Colors.white),
-                  errorBuilder: (context, url, error) =>
-                      const Icon(Icons.error),
                 ),
                 Positioned(
                   bottom: 0,
