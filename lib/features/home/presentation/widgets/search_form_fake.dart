@@ -32,9 +32,16 @@ class SearchFormFake extends StatelessWidget {
             children: [
               SvgPicture.asset("assets/icons/Search.svg"),
               const Gap(defaultPadding / 2),
-              Text(
-                searchQuery != null ? searchQuery! : "Search products...",
-                style: const TextStyle(color: Colors.grey),
+              Expanded(
+                child: Text(
+                  searchQuery ?? "Search products...",
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
