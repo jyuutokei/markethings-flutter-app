@@ -78,6 +78,29 @@ class _ProfileState extends State<Profile> {
                             ),
                           ),
                           leading: const Icon(
+                            Icons.edit,
+                            color: Color(0xFF046EF4),
+                          ),
+                          title: const Text("Edit profile"),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () async {
+                            final didUpdate = await context.pushNamed<bool>(
+                              AppRoute.editProfile,
+                            );
+                            if (didUpdate == true && mounted) {
+                              await _loadProfile();
+                            }
+                          },
+                        ),
+                        const Gap(defaultPadding / 2),
+                        ListTile(
+                          tileColor: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(defaultBorderRadius),
+                            ),
+                          ),
+                          leading: const Icon(
                             Icons.shopping_bag,
                             color: Color(0xFF046EF4),
                           ),
