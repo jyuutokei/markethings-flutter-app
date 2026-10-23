@@ -25,12 +25,13 @@ class _OrderItemsCardState extends State<OrderItemsCard> {
   Widget build(BuildContext context) {
     return ListTile(
       leading: Skeleton.replace(
-        width: double.infinity,
-        height: 132,
+        width: 56,
+        height: 72,
         child: CachedNetworkImage(
           imageUrl: orderLineItem.imageUrl ?? fallbackImageUrl,
           imageBuilder: (context, imageProvider) => Container(
-            height: 132,
+            width: 56,
+            height: 72,
             decoration: BoxDecoration(
               image: DecorationImage(fit: BoxFit.cover, image: imageProvider),
             ),
