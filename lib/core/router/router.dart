@@ -14,6 +14,7 @@ import 'package:mt/features/home/presentation/pages/cart.dart';
 import 'package:mt/features/home/presentation/pages/checkout.dart';
 import 'package:mt/features/home/presentation/pages/create_product.dart';
 import 'package:mt/features/home/presentation/pages/details.dart';
+import 'package:mt/features/home/presentation/pages/edit_profile.dart';
 import 'package:mt/features/home/presentation/pages/favorites.dart';
 import 'package:mt/features/home/presentation/pages/home.dart';
 import 'package:mt/features/home/presentation/pages/my_products.dart';
@@ -216,7 +217,24 @@ final goRouter = GoRouter(
       pageBuilder: (context, state) {
         return CustomTransitionPage(
           key: state.pageKey,
-          child: const CreateProduct(),
+          child: CreateProduct(
+            productId: int.tryParse(
+              state.uri.queryParameters['productId'] ?? '',
+            ),
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(opacity: animation, child: child),
+        );
+      },
+    ),
+    GoRoute(
+      parentNavigatorKey: rootNavigatorKey,
+      path: '/edit_profile',
+      name: AppRoute.editProfile,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: const EditProfile(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) =>
               FadeTransition(opacity: animation, child: child),
         );
