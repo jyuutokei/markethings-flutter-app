@@ -20,6 +20,30 @@ class _LoginState extends State<Login> {
   bool _isSigningIn = true;
   bool _hasOpenedResetOtp = false;
 
+  void _logAuthProviders(String flow, User? user) {
+    final providers = <String>{};
+
+    for (final identity in user?.identities ?? []) {
+      providers.add(identity.provider);
+    }
+
+    final metadataProviders = user?.appMetadata['providers'];
+    if (metadataProviders is List) {
+      providers.addAll(metadataProviders.whereType<String>());
+    }
+
+    final primaryProvider = user?.appMetadata['provider'];
+    if (primaryProvider is String) {
+      providers.add(primaryProvider);
+    }
+
+    AppHelpers.logger().info(
+      '$flow; Google linked: ${providers.contains('google')}; '
+      'email/password linked: ${providers.contains('email')}; '
+      'providers: ${providers.isEmpty ? 'unknown' : providers.join(', ')}',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,6 +99,7 @@ class _LoginState extends State<Login> {
                   ? null
                   : 'io.supabase.markethings://login_callback/',
               onSignInComplete: (response) {
+                _logAuthProviders('Email/password sign-in', response.user);
                 AppHelpers.showSnackBar(
                   context,
                   "Signed in successfully",
@@ -109,6 +134,8 @@ class _LoginState extends State<Login> {
 
                   return;
                 }
+
+                _logAuthProviders('Email/password sign-up', user);
 
                 if (response.session == null) {
                   context.pushNamed(
@@ -161,6 +188,7 @@ class _LoginState extends State<Login> {
                 webClientId: Env.googleWebClientId,
               ),
               onSuccess: (session) {
+                _logAuthProviders('Google sign-in', session.user);
                 AppHelpers.showSnackBar(
                   context,
                   "Signed in successfully",
