@@ -7,6 +7,7 @@ class VariantModel extends VariantEntity {
     required super.name,
     required super.price,
     super.imageUrl,
+    super.imagePath,
     required super.stockQuantity,
     required super.attributes,
   });
@@ -18,6 +19,7 @@ class VariantModel extends VariantEntity {
       name: json['name'] as String,
       price: (json['price'] as num).toDouble(),
       imageUrl: json['image_url'] as String?,
+      imagePath: json['image_path'] as String?,
       stockQuantity: json['stock_quantity'] as int,
       attributes: Map<String, dynamic>.from(json['attributes'] as Map),
     );
@@ -32,6 +34,7 @@ class ProductDetailsModel extends ProductDetailsEntity {
     required super.title,
     super.description,
     super.mainImageUrl,
+    super.mainImagePath,
     required super.variants,
     required super.sellerDisplayName,
     super.sellerStoreName,
@@ -47,6 +50,7 @@ class ProductDetailsModel extends ProductDetailsEntity {
       title: json['title'] as String,
       description: json['description'] as String?,
       mainImageUrl: json['main_image_url'] as String?,
+      mainImagePath: json['main_image_path'] as String?,
       variants: (json['variants'] as List)
           .map((v) => VariantModel.fromJson(v as Map<String, dynamic>))
           .toList(),
