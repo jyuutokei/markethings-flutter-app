@@ -6,6 +6,7 @@ class VariantEntity extends Equatable {
   final String name;
   final double price;
   final String? imageUrl;
+  final String? imagePath;
   final int stockQuantity;
   final Map<String, dynamic> attributes;
 
@@ -15,6 +16,7 @@ class VariantEntity extends Equatable {
     required this.name,
     required this.price,
     this.imageUrl,
+    this.imagePath,
     required this.stockQuantity,
     required this.attributes,
   });
@@ -24,6 +26,7 @@ class VariantEntity extends Equatable {
     name,
     price,
     ?imageUrl,
+    ?imagePath,
     stockQuantity,
     attributes,
   ];
@@ -36,6 +39,7 @@ class ProductDetailsEntity extends Equatable {
   final String title;
   final String? description;
   final String? mainImageUrl;
+  final String? mainImagePath;
   final List<VariantEntity> variants; // the grouped array
   final String sellerDisplayName;
   final String? sellerStoreName;
@@ -47,6 +51,7 @@ class ProductDetailsEntity extends Equatable {
     required this.title,
     this.description,
     this.mainImageUrl,
+    this.mainImagePath,
     required this.variants,
     required this.sellerDisplayName,
     this.sellerStoreName,
@@ -60,6 +65,7 @@ class ProductDetailsEntity extends Equatable {
     sellerId,
     ?description,
     ?mainImageUrl,
+    ?mainImagePath,
     variants,
     sellerDisplayName,
     ?sellerStoreName,
