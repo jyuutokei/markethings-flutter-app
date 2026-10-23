@@ -11,4 +11,9 @@ class CreateProductRepositoryImpl implements CreateProductRepository {
   Future<int> submitProduct({required CreateProductInput input}) {
     return remoteDataSource.submitProduct(input: input);
   }
+
+  @override
+  Future<int> updateProduct({required CreateProductInput input}) {
+    return remoteDataSource.updateProduct(input: input);
+  }
 }
