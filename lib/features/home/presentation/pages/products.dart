@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:mt/core/constants/constants.dart';
 import 'package:mt/core/router/routes.dart';
+import 'package:mt/core/router/tab_refresher.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/category_entity.dart';
 import 'package:mt/features/home/domain/entities/product_card_entity.dart';
@@ -238,6 +239,7 @@ class _ProductsState extends State<Products> {
           IconButton(
             icon: const Icon(Icons.home_outlined),
             onPressed: () {
+              homeTabRefresher.notifyHomeTabSelected();
               context.goNamed(AppRoute.home);
             },
           ),
@@ -341,9 +343,17 @@ class _ProductsState extends State<Products> {
                                           ProductCard.estimatedHeightForWidth(
                                             tileWidth,
                                           ),
-                                      child: Padding(
+                                      child: Container(
                                         padding: const EdgeInsets.all(
                                           defaultPadding / 2,
+                                        ),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(
+                                              defaultBorderRadius,
+                                            ),
+                                          ),
                                         ),
                                         child: Column(
                                           crossAxisAlignment:
