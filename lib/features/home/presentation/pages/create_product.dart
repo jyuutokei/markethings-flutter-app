@@ -1,20 +1,26 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mt/core/constants/constants.dart';
+import 'package:mt/core/router/routes.dart';
 import 'package:mt/core/utils/helpers.dart';
 import 'package:mt/features/home/domain/entities/category_entity.dart';
 import 'package:mt/features/home/domain/entities/create_product_input.dart';
 import 'package:mt/features/home/domain/usecases/get_categories.dart';
+import 'package:mt/features/home/domain/usecases/get_product_details.dart';
 import 'package:mt/features/home/domain/usecases/submit_product.dart';
+import 'package:mt/features/home/domain/usecases/update_product.dart';
 import 'package:mt/features/home/presentation/widgets/create_product_picked_image.dart';
 import 'package:mt/features/home/presentation/widgets/create_product_section_heading.dart';
 import 'package:mt/features/home/presentation/widgets/create_product_variant_fields.dart';
 import 'package:mt/injection_container.dart';
 
 class CreateProduct extends StatefulWidget {
-  const CreateProduct({super.key});
+  final int? productId;
+
+  const CreateProduct({super.key, this.productId});
 
   @override
   State<CreateProduct> createState() => _CreateProductState();
@@ -33,13 +39,17 @@ class _CreateProductState extends State<CreateProduct> {
   int? _categoryId;
   CreateProductPickedImage? _mainImage;
   bool _isLoadingCategories = true;
+  bool _isConfirmingSubmission = false;
+  bool _isLoadingProduct = false;
   bool _isSubmitting = false;
   String? _categoryError;
+  String? _productLoadError;
 
   @override
   void initState() {
     super.initState();
     _loadCategories();
+    if (widget.productId != null) _loadProduct();
   }
 
   @override
@@ -70,6 +80,58 @@ class _CreateProductState extends State<CreateProduct> {
       setState(() {
         _categoryError = 'Categories could not be loaded.';
         _isLoadingCategories = false;
+      });
+    }
+  }
+
+  Future<void> _loadProduct() async {
+    final productId = widget.productId;
+    if (productId == null) return;
+
+    setState(() {
+      _isLoadingProduct = true;
+      _productLoadError = null;
+    });
+
+    try {
+      final product = await sl<GetProductDetails>().call(productId);
+      if (!mounted) return;
+
+      _titleController.text = product.title;
+      _descriptionController.text = product.description ?? '';
+      _categoryId = product.categoryId;
+      _mainImage = product.mainImagePath == null
+          ? null
+          : CreateProductPickedImage.existing(
+              previewUrl: product.mainImageUrl,
+              storagePath: product.mainImagePath,
+            );
+
+      for (final variant in _variants) {
+        variant.dispose();
+      }
+      _variants.clear();
+      for (final productVariant in product.variants) {
+        final fields = CreateProductVariantFields()
+          ..variantId = productVariant.id
+          ..nameController.text = productVariant.name
+          ..priceController.text = productVariant.price.toStringAsFixed(2)
+          ..stockController.text = productVariant.stockQuantity.toString();
+        if (productVariant.imagePath != null) {
+          fields.image = CreateProductPickedImage.existing(
+            previewUrl: productVariant.imageUrl,
+            storagePath: productVariant.imagePath,
+          );
+        }
+        _variants.add(fields);
+      }
+      if (_variants.isEmpty) _variants.add(CreateProductVariantFields());
+      setState(() => _isLoadingProduct = false);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _productLoadError = 'Product could not be loaded for editing.';
+        _isLoadingProduct = false;
       });
     }
   }
@@ -115,43 +177,80 @@ class _CreateProductState extends State<CreateProduct> {
 
   void _removeVariant(int index) {
     if (_variants.length == 1) return;
+    if (_variants[index].variantId != null) return;
     setState(() {
       _variants.removeAt(index).dispose();
     });
   }
 
   Future<void> _submit() async {
+    if (_isConfirmingSubmission || _isSubmitting) return;
+    if (_isLoadingProduct || _productLoadError != null) return;
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
 
+    var confirmed = false;
+    setState(() => _isConfirmingSubmission = true);
+    try {
+      confirmed = await AppHelpers.showCenterModal(
+        context,
+        widget.productId == null ? 'Submit product?' : 'Save product changes?',
+        widget.productId == null
+            ? 'Submit "${_titleController.text.trim()}"?'
+            : 'Save changes to "${_titleController.text.trim()}"?',
+      );
+    } catch (_) {
+      if (mounted) {
+        _showMessage('Error', 'Could not confirm product submission.');
+      }
+    } finally {
+      if (mounted) setState(() => _isConfirmingSubmission = false);
+    }
+
+    if (!confirmed || !mounted) return;
+
     setState(() => _isSubmitting = true);
     try {
-      await sl<SubmitProduct>().call(
-        input: CreateProductInput(
-          title: _titleController.text.trim(),
-          categoryId: _categoryId!,
-          description: _descriptionController.text.trim().isEmpty
-              ? null
-              : _descriptionController.text.trim(),
-          mainImageBytes: _mainImage?.bytes,
-          variants: _variants
-              .map(
-                (variant) => CreateProductVariantInput(
-                  name: variant.nameController.text.trim(),
-                  price: double.parse(variant.priceController.text.trim()),
-                  stockQuantity: int.parse(variant.stockController.text.trim()),
-                  imageBytes: variant.image?.bytes,
-                ),
-              )
-              .toList(growable: false),
-        ),
+      final input = CreateProductInput(
+        productId: widget.productId,
+        title: _titleController.text.trim(),
+        categoryId: _categoryId!,
+        description: _descriptionController.text.trim().isEmpty
+            ? null
+            : _descriptionController.text.trim(),
+        mainImageBytes: _mainImage?.bytes,
+        mainImagePath: _mainImage?.bytes == null
+            ? _mainImage?.storagePath
+            : null,
+        variants: _variants
+            .map(
+              (variant) => CreateProductVariantInput(
+                variantId: variant.variantId,
+                name: variant.nameController.text.trim(),
+                price: double.parse(variant.priceController.text.trim()),
+                stockQuantity: int.parse(variant.stockController.text.trim()),
+                imageBytes: variant.image?.bytes,
+                imagePath: variant.image?.bytes == null
+                    ? variant.image?.storagePath
+                    : null,
+              ),
+            )
+            .toList(growable: false),
       );
+      if (widget.productId == null) {
+        await sl<SubmitProduct>().call(input: input);
+      } else {
+        await sl<UpdateProduct>().call(input: input);
+      }
       if (mounted) {
         _showMessage(
           'Success',
-          'Product submitted successfully.',
+          widget.productId == null
+              ? 'Product submitted successfully.'
+              : 'Product updated successfully.',
           contentType: ContentType.success,
         );
+        context.pushReplacementNamed(AppRoute.myProducts);
       }
     } catch (_) {
       if (mounted) {
@@ -196,110 +295,144 @@ class _CreateProductState extends State<CreateProduct> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create product')),
+      appBar: AppBar(
+        title: Text(
+          widget.productId == null ? 'Create product' : 'Edit product',
+        ),
+      ),
       body: SafeArea(
         top: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: Form(
-              key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
-                children: [
-                  const CreateProductSectionHeading(
-                    title: 'Product details',
-                    subtitle: 'Add the information customers will see.',
-                  ),
-                  const Gap(defaultPadding),
-                  _formSection(
-                    children: [
-                      TextFormField(
-                        controller: _titleController,
-                        textCapitalization: TextCapitalization.sentences,
-                        maxLength: 120,
-                        decoration: const InputDecoration(
-                          labelText: 'Product title *',
-                          hintText: 'For example, Cotton shirt',
-                          counterText: '',
-                        ),
-                        validator: (value) {
-                          final title = value?.trim() ?? '';
-                          if (title.runes.length < 3) {
-                            return 'Title must be at least 3 characters';
-                          }
-                          return null;
-                        },
-                      ),
-                      const Gap(defaultPadding),
-                      _categoryField(),
-                      const Gap(defaultPadding),
-                      TextFormField(
-                        controller: _descriptionController,
-                        textCapitalization: TextCapitalization.sentences,
-                        minLines: 3,
-                        maxLines: 6,
-                        maxLength: 2000,
-                        decoration: const InputDecoration(
-                          labelText: 'Description',
-                          hintText: 'Describe the product',
-                          alignLabelWithHint: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Gap(defaultPadding * 2),
-                  const CreateProductSectionHeading(
-                    title: 'Product image',
-                    subtitle: 'Choose a main image for the product listing.',
-                  ),
-                  const Gap(defaultPadding),
-                  _formSection(children: [_mainImagePicker()]),
-                  const Gap(defaultPadding * 2),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Expanded(
-                        child: CreateProductSectionHeading(
-                          title: 'Variants',
-                          subtitle:
-                              'Add at least one option with price and stock.',
-                        ),
-                      ),
-                      const Gap(defaultPadding - 4),
-                      IconButton.filledTonal(
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.white,
-                        ),
-                        onPressed: _addVariant,
-                        tooltip: 'Add variant',
-                        icon: Icon(
-                          Icons.add,
-                          color: AppHelpers.primaryColor(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Gap(defaultPadding),
-                  for (var index = 0; index < _variants.length; index++) ...[
-                    _variantCard(index),
-                    if (index < _variants.length - 1) const Gap(12),
+        child: _productLoadError != null
+            ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(_productLoadError!),
+                    TextButton.icon(
+                      onPressed: _loadProduct,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
+                    ),
                   ],
-                  const Gap(24),
-                  SizedBox(
-                    height: 52,
-                    child: FilledButton.icon(
-                      onPressed: _isSubmitting ? null : _submit,
-                      label: Text(
-                        _isSubmitting ? 'Submitting...' : 'Submit product',
-                      ),
+                ),
+              )
+            : _isLoadingProduct
+            ? const Center(child: CircularProgressIndicator())
+            : Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 760),
+                  child: Form(
+                    key: _formKey,
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+                      children: [
+                        const CreateProductSectionHeading(
+                          title: 'Product details',
+                          subtitle: 'Add the information customers will see.',
+                        ),
+                        const Gap(defaultPadding),
+                        _formSection(
+                          children: [
+                            TextFormField(
+                              controller: _titleController,
+                              textCapitalization: TextCapitalization.sentences,
+                              maxLength: 120,
+                              decoration: const InputDecoration(
+                                labelText: 'Product title *',
+                                hintText: 'For example, Cotton shirt',
+                                counterText: '',
+                              ),
+                              validator: (value) {
+                                final title = value?.trim() ?? '';
+                                if (title.runes.length < 3) {
+                                  return 'Title must be at least 3 characters';
+                                }
+                                return null;
+                              },
+                            ),
+                            const Gap(defaultPadding),
+                            _categoryField(),
+                            const Gap(defaultPadding),
+                            TextFormField(
+                              controller: _descriptionController,
+                              textCapitalization: TextCapitalization.sentences,
+                              minLines: 3,
+                              maxLines: 6,
+                              maxLength: 2000,
+                              decoration: const InputDecoration(
+                                labelText: 'Description',
+                                hintText: 'Describe the product',
+                                alignLabelWithHint: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Gap(defaultPadding * 2),
+                        const CreateProductSectionHeading(
+                          title: 'Product thumbnail image',
+                          subtitle:
+                              'Choose a main image for the product listing.',
+                        ),
+                        const Gap(defaultPadding),
+                        _formSection(children: [_mainImagePicker()]),
+                        const Gap(defaultPadding * 2),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Expanded(
+                              child: CreateProductSectionHeading(
+                                title: 'Variants',
+                                subtitle:
+                                    'Add your only product or product variants here, with price and stock.\n(You can reuse your thumbnail image)',
+                              ),
+                            ),
+                            const Gap(defaultPadding - 4),
+                            IconButton.filledTonal(
+                              style: IconButton.styleFrom(
+                                backgroundColor: Colors.white,
+                              ),
+                              onPressed: _addVariant,
+                              icon: Icon(
+                                Icons.add,
+                                color: AppHelpers.primaryColor(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Gap(defaultPadding),
+                        for (
+                          var index = 0;
+                          index < _variants.length;
+                          index++
+                        ) ...[
+                          _variantCard(index),
+                          if (index < _variants.length - 1) const Gap(12),
+                        ],
+                        const Gap(24),
+                        SizedBox(
+                          height: 52,
+                          child: FilledButton.icon(
+                            onPressed: _isConfirmingSubmission || _isSubmitting
+                                ? null
+                                : _submit,
+                            label: Text(
+                              _isSubmitting
+                                  ? widget.productId == null
+                                        ? 'Submitting...'
+                                        : 'Saving...'
+                                  : _isConfirmingSubmission
+                                  ? 'Confirming...'
+                                  : widget.productId == null
+                                  ? 'Submit product'
+                                  : 'Save changes',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -325,6 +458,7 @@ class _CreateProductState extends State<CreateProduct> {
     }
 
     return DropdownButtonFormField<int>(
+      key: ValueKey(_categoryId),
       initialValue: _categoryId,
       decoration: const InputDecoration(labelText: 'Category *'),
       items: _categories
@@ -382,10 +516,9 @@ class _CreateProductState extends State<CreateProduct> {
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
-            if (_variants.length > 1)
+            if (_variants.length > 1 && variant.variantId == null)
               IconButton(
                 onPressed: () => _removeVariant(index),
-                tooltip: 'Remove variant',
                 icon: const Icon(Icons.delete_outline),
               ),
           ],
@@ -460,9 +593,7 @@ class _CreateProductState extends State<CreateProduct> {
                 ? Icons.add_photo_alternate_outlined
                 : Icons.edit_outlined,
           ),
-          label: Text(
-            variant.image == null ? 'Add variant image' : 'Change image',
-          ),
+          label: Text(variant.image == null ? 'Add image' : 'Change image'),
         ),
       ],
     );
@@ -476,23 +607,33 @@ class _CreateProductState extends State<CreateProduct> {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.memory(
-            image.bytes,
-            height: 190,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => const SizedBox(
-              height: 120,
-              child: Center(child: Icon(Icons.broken_image_outlined)),
-            ),
-          ),
+          child: image.bytes != null
+              ? Image.memory(
+                  image.bytes!,
+                  height: 190,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const SizedBox(
+                    height: 120,
+                    child: Center(child: Icon(Icons.broken_image_outlined)),
+                  ),
+                )
+              : Image.network(
+                  image.previewUrl ?? '',
+                  height: 190,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const SizedBox(
+                    height: 120,
+                    child: Center(child: Icon(Icons.broken_image_outlined)),
+                  ),
+                ),
         ),
         Positioned(
           top: 8,
           right: 8,
           child: IconButton.filled(
             onPressed: onRemove,
-            tooltip: 'Remove image',
             style: IconButton.styleFrom(
               backgroundColor: Colors.black54,
               foregroundColor: Colors.white,
