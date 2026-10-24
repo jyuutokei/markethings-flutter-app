@@ -35,6 +35,7 @@ class ProfileHeader extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 Container(
+                  height: 150,
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
