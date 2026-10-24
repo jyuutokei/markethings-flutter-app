@@ -1,3 +1,4 @@
+import 'package:cached_network_image_ce/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -22,6 +23,8 @@ class Checkout extends StatefulWidget {
 class _CheckoutState extends State<Checkout> {
   List<CartItemDetailsEntity> get _cartItems => widget.cartItems;
   var _step = 0;
+  String fallbackImageUrl =
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIVapXPpvWb8ds1BaPIHsUEKnobPWCWI3srk7Wc5hFNA&s=10';
 
   Future<void> insertOrder() async {
     try {
@@ -30,7 +33,10 @@ class _CheckoutState extends State<Checkout> {
       );
 
       if (!mounted) return;
-      context.pushReplacementNamed(AppRoute.orderConfirm, extra: order.orderId);
+      context.pushReplacementNamed(
+        AppRoute.orderConfirm,
+        extra: {'orderId': order.orderId, 'cartItems': _cartItems},
+      );
     } catch (error) {
       AppHelpers.logger().error(error);
     }
@@ -48,6 +54,13 @@ class _CheckoutState extends State<Checkout> {
         currentStep: _step,
         onStepContinue: () async {
           if (_step == 2) {
+            final confirmed = await AppHelpers.showCenterModal(
+              context,
+              'Place order?',
+              'Are you sure you want to place this order?',
+            );
+            if (!confirmed) return;
+
             await insertOrder();
             return;
           }
@@ -121,8 +134,100 @@ class _CheckoutState extends State<Checkout> {
           ),
           Step(
             title: const Text('Summary'),
-            content: Text(
-              'Order total: ${AppHelpers.pesoFormatter(totalCartItems())}',
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final item in _cartItems) ...[
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(
+                      vertical: defaultPadding / 6,
+                    ),
+                    padding: const EdgeInsets.all(defaultPadding),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(defaultBorderRadius),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(
+                            defaultBorderRadius,
+                          ),
+                          child: SizedBox(
+                            width: 56,
+                            height: 56,
+                            child: CachedNetworkImage(
+                              imageUrl: item.imageUrl ?? fallbackImageUrl,
+                              imageBuilder: (context, imageProvider) =>
+                                  Container(
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        fit: BoxFit.cover,
+                                        image: imageProvider,
+                                      ),
+                                    ),
+                                  ),
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) =>
+                                  const SizedBox.expand(),
+                              errorBuilder: (context, url, error) {
+                                AppHelpers.logger().error(error);
+                                return const Icon(Icons.error);
+                              },
+                            ),
+                          ),
+                        ),
+                        const Gap(defaultPadding / 2),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.productTitle,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'Variant: ${item.variantName}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              Text('Quantity: ${item.quantity}'),
+                              const Gap(defaultPadding / 2),
+                              Text(
+                                AppHelpers.pesoFormatter(
+                                  item.price * item.quantity,
+                                ),
+                                style: TextStyle(
+                                  color: AppHelpers.primaryColor(context),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Gap(defaultPadding / 2),
+                ],
+                const Gap(defaultPadding / 2),
+                Text(
+                  'Order Total: ${AppHelpers.pesoFormatter(totalCartItems())}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
