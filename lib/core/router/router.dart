@@ -147,9 +147,22 @@ final goRouter = GoRouter(
       path: '/order_confirm',
       name: AppRoute.orderConfirm,
       pageBuilder: (context, state) {
+        final extra = state.extra;
+        final confirmationData = extra is Map<dynamic, dynamic>
+            ? extra
+            : const <String, dynamic>{};
+        final cartItemsValue = confirmationData['cartItems'];
+        final cartItems = cartItemsValue is Iterable
+            ? cartItemsValue.whereType<CartItemDetailsEntity>().toList()
+            : const <CartItemDetailsEntity>[];
         return CustomTransitionPage(
           key: state.pageKey,
-          child: const OrderConfirmation(),
+          child: OrderConfirmation(
+            orderId: confirmationData['orderId'] is int
+                ? confirmationData['orderId'] as int
+                : null,
+            cartItems: cartItems,
+          ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return SharedAxisTransition(
               animation: animation,
