@@ -4,8 +4,8 @@ import 'package:talker_flutter/talker_flutter.dart';
 
 Positioned talkerScreen(GlobalKey<NavigatorState> navigatorKey) {
   return Positioned(
-    bottom: 40,
-    right: 20,
+    bottom: 120,
+    right: 10,
     child: FloatingActionButton(
       onPressed: () {
         navigatorKey.currentState?.push(
